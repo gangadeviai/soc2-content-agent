@@ -1,0 +1,9 @@
+# Prompt and model changes are behaviour changes (CC8.1). They require review by security.
+/prompts/                       @marketing-platform-security @marketing-platform-leads
+/tenants/                       @marketing-platform-security
+/app/llm.py                     @marketing-platform-security
+/app/brand.py                   @marketing-platform-security
+/app/cms.py                     @marketing-platform-security
+/app/config.py                  @marketing-platform-security
+/compliance/                    @marketing-platform-security @grc-team
+/infra/                         @platform-infra @marketing-platform-security

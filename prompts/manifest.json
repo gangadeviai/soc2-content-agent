@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "versions": {
+    "1.0.0": {
+      "files": {
+        "injection_guard.md": "a4f190d7551ff9be90539a4e855314bf27e9a6b3b07307a0fd8fb0d490939a7e",
+        "system.md": "3bacefd225bade2e5485c6be4861e8feacbae55a6a923ac5652d78c81386f539"
+      },
+      "status": "deprecated"
+    },
+    "1.1.0": {
+      "files": {
+        "brand_analysis.md": "7d24488f8820649e4be26a4c0fbb02f5a12cfa09324e3b5ecfe0d7f606a51869",
+        "injection_guard.md": "a4f190d7551ff9be90539a4e855314bf27e9a6b3b07307a0fd8fb0d490939a7e",
+        "strategy.md": "addfa374a71ffc65178547f034f1232b44b59556acae4d284f38bd965aff0004",
+        "system.md": "3bacefd225bade2e5485c6be4861e8feacbae55a6a923ac5652d78c81386f539"
+      },
+      "status": "deprecated"
+    },
+    "1.2.0": {
+      "files": {
+        "brand_analysis.md": "7d24488f8820649e4be26a4c0fbb02f5a12cfa09324e3b5ecfe0d7f606a51869",
+        "injection_guard.md": "a4f190d7551ff9be90539a4e855314bf27e9a6b3b07307a0fd8fb0d490939a7e",
+        "strategy.md": "addfa374a71ffc65178547f034f1232b44b59556acae4d284f38bd965aff0004",
+        "system.md": "cf714071eea0a92b6a11f4c4b628bd5b3b06e1c96531910731b4a977796247be"
+      },
+      "status": "approved"
+    }
+  }
+}

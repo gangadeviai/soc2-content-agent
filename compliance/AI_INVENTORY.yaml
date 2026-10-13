@@ -1,0 +1,53 @@
+# AI inventory (CC3.2 / CC6.1). Reviewed quarterly with the access review.
+# Every model, key, service account and AI-adjacent tool used by this system, each with an owner.
+# Egress proxy deny logs are reconciled against this list monthly; an unlisted AI endpoint is a finding.
+last_reviewed: 2026-10-09
+reviewed_by: "<name, role>"
+organisation_role: "AI user / deployer (does not train or fine-tune models)"
+
+models:
+  - id: claude-opus-5-5
+    provider: Anthropic
+    purpose: Draft generation
+    data_sent: Redacted briefs, redacted knowledge chunks
+    retention: Zero Data Retention (contract ref <...>)
+    pinned_in: app/config.py (AGENT_MODEL_ID)
+    owner: marketing-platform-security
+    fallback: "server-side 'default' fallback enabled; served model logged per request"
+    notes: "Claude Fable 5.1 is NOT eligible for ZDR by default - do not switch without re-assessment"
+
+service_accounts_and_keys:
+  - name: anthropic-api-key (prod)
+    stored_in: Secrets manager / Workload Identity Federation
+    scope: Messages API only
+    rotation: 90 days
+    owner: marketing-platform-security
+  - name: kb_readonly (Postgres role)
+    scope: SELECT on kb_chunks only, default_transaction_read_only
+    owner: platform-infra
+  - name: content-agent-runtime (cloud IAM role)
+    scope: s3:PutObject on audit prefix only; kms:GenerateDataKey
+    owner: platform-infra
+  - name: wordpress-app-password (one per tenant, e.g. AGENT_WP_APP_PASSWORD__CLIENT_A)
+    scope: WordPress REST API as a dedicated user with Author/Editor role on that brand's site only
+    stored_in: Secrets manager; mounted ONLY into the publish workload
+    rotation: 90 days; revoke in WP admin on client offboarding
+    owner: marketing-platform-leads
+  - name: brand-crawler egress
+    scope: HTTPS GET to hosts listed in tenants/brands.yaml only (egress allow-list); honours robots.txt
+    user_agent: SOC2ContentAgent/1.0
+    owner: platform-infra
+
+ai_adjacent_tools:
+  - name: Microsoft Presidio
+    runs: in-process (no external calls)
+    purpose: PII detection
+    owner: marketing-platform-security
+  - name: embedding model for pgvector
+    provider: "<TBD - must be under ZDR>"
+    owner: marketing-platform-security
+    status: gap - see SOC2_CONTROL_MATRIX.md
+
+prohibited:
+  - Consumer chat tools (ChatGPT, Gemini, Claude.ai consumer) for client material - blocked at egress, covered by ACCEPTABLE_AI_USE.md
+  - Browser extensions that send page content to AI services

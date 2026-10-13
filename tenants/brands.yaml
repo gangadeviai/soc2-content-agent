@@ -1,0 +1,37 @@
+# Per-tenant brand website configuration (crawl scope + publish target).
+# This file is the ONLY source of crawl/publish targets - API callers cannot name a URL.
+# Changes require PR review by CODEOWNERS (CC8.1). Hosts must be public DNS names, never IPs.
+#
+# Fields:
+#   domain                 crawl scope: this host and its subdomains only
+#   seed_paths / allowed_path_prefixes / max_pages   crawl limits
+#   wordpress_url          where approved content is published
+#   wordpress_platform     self_hosted (application password) | wordpress_com (free WordPress.com, OAuth2 token)
+#   publish_domain         host the publisher may write to; defaults to `domain`. Set it when the blog lives
+#                          elsewhere (e.g. a WordPress.com learning site). Still Git-pinned, still reviewed.
+#   seo_plugin             yoast | rankmath | omit  (self-hosted only; sends title tag / meta description)
+
+# --- Learning tenant (zero-cost real run). Replace with the public brand you want to analyze. ---
+learn:
+  domain: firepencil.ai                # public AEO SaaS site; robots.txt allows all crawlers
+  seed_paths: ["/"]
+  allowed_path_prefixes: ["/"]
+  max_pages: 15
+  wordpress_url: https://gangadeviai.wordpress.com
+  wordpress_platform: wordpress_com
+  publish_domain: gangadeviai.wordpress.com
+
+# --- Demo/test tenants used by the offline test-suite ---
+client-a:
+  domain: client-a.example
+  wordpress_url: https://client-a.example
+  seed_paths: ["/", "/about", "/products"]
+  allowed_path_prefixes: ["/"]
+  max_pages: 25
+  seo_plugin: yoast
+client-b:
+  domain: client-b.example
+  wordpress_url: https://www.client-b.example
+  seed_paths: ["/"]
+  allowed_path_prefixes: ["/", "/blog"]
+  max_pages: 15

@@ -1,0 +1,32 @@
+# Free, real WordPress for the publish stage (learning setup).
+#   docker compose -f docker-compose.wordpress.yml up -d
+#   open http://localhost:8080 -> finish the 5-minute install
+#   Users -> Add New: user "content-agent", role Editor
+#   Users -> content-agent -> Application Passwords -> "content-agent" -> copy the password
+#   put AGENT_WP_USER__<TENANT> / AGENT_WP_APP_PASSWORD__<TENANT> into .env
+# Application passwords require HTTPS by default; for a local http site WordPress permits them
+# when WP_ENVIRONMENT_TYPE=local (set below). Never use this compose file for a real client site.
+services:
+  db:
+    image: mariadb:11
+    environment:
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: wordpress
+      MARIADB_PASSWORD: wordpress
+      MARIADB_ROOT_PASSWORD: root
+    volumes: ["wp_db:/var/lib/mysql"]
+  wordpress:
+    image: wordpress:6
+    depends_on: [db]
+    ports: ["8080:80"]
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_ENVIRONMENT_TYPE', 'local');
+    volumes: ["wp_html:/var/www/html"]
+volumes:
+  wp_db:
+  wp_html:

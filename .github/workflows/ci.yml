@@ -1,0 +1,31 @@
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  controls:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e ".[dev]"
+      - name: Prompt manifest is current (prompts cannot change without a manifest bump)
+        run: python scripts/build_prompt_manifest.py --check
+      - name: Prompt versions used in prod are approved
+        run: python -c "import json;m=json.load(open('prompts/manifest.json'));assert m['versions']['1.2.0']['status']=='approved'"
+      - name: Lint
+        run: ruff check .
+      - name: Control tests (redaction, tenant isolation, review gate, audit chain, injection set)
+        run: pytest -q
+      - name: Dependency vulnerability scan
+        run: pip install pip-audit && pip-audit
+      - name: Secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,8 @@
+# Tenant-specific confidential terms that must never reach the model provider.
+# Unreleased product codenames, unannounced partners, customer names under NDA.
+# Changes go through PR review like any other control (CC8.1).
+client-a:
+  - "Project Nimbus"
+  - "Acme Holdings"
+client-b:
+  - "Q4 Secret Menu"
