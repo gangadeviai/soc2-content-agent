@@ -1,188 +1,374 @@
-# SOC 2-ready Marketing Content Agent
+# SOC 2-Aligned AI Marketing Content Agent
 
-> **Status (2026-10-12):** full pipeline verified end-to-end on a real run at $0 — real crawl of a
-> public brand site, real Gemini free-tier model, human gates at every stage, real publish to a
-> WordPress.com site with read-back verification, tamper-evident audit trail. 49 control tests pass.
-> Built as a learning project for **SOC 2 Type II in an AI-agent context**; see [LEARNING.md](LEARNING.md).
-> One real exception was caught and remediated during that run — see the field note under control C-37.
+**An AI-powered content automation platform combining brand intelligence, SEO/AEO/GEO optimisation, human oversight, secure publishing, and auditable workflows.**
 
-An agency-grade pipeline that **analyzes a brand from its own website, builds a
-content strategy, writes the content, and publishes it to the brand's WordPress
-site** — with a human gate and an immutable audit record at every stage, mapped to
-the controls a SOC 2 auditor tests in 2026.
+Build, review, and publish brand-aligned marketing content through a structured AI workflow designed with security, accountability, and operational governance in mind.
 
+The platform transforms a brand's website into a structured content foundation, develops a strategic content plan, generates search-optimised content, and publishes approved material to WordPress. Each major stage incorporates human review, while the system maintains a traceable record of decisions and actions.
+
+> **Verified run (12 October 2026):** the complete workflow was exercised end-to-end against live services — a public brand website, a hosted language model, and a WordPress.com site — with every approval gate, the SEO/AEO/GEO validator (100/100 on the published article), read-back verification, and the hash-linked audit trail operating as designed. One publication exception was detected by the verifier, remediated, and re-published in place; the episode is documented under control C-37 in the control matrix.
+
+## Project Highlights
+
+- **End-to-end content automation:** Connect brand analysis, content strategy, AI-assisted writing, editorial review, and WordPress publishing in one workflow.
+- **SEO, AEO, and GEO optimisation:** Evaluate content for traditional search engines, answer engines, and generative AI search experiences.
+- **Human-in-the-loop governance:** Require explicit reviewer approval at critical workflow stages.
+- **Security-conscious architecture:** Incorporate scoped website crawling, prompt-injection screening, confidential-term redaction, and tenant-specific configuration.
+- **Auditable operations:** Maintain hash-linked audit records and support verification of workflow history.
+- **Multi-tenant design:** Separate brand configuration, content context, and publishing credentials by client.
+- **Reproducible AI workflows:** Use version-controlled prompts, model configuration records, and structured model outputs.
+- **Flexible execution modes:** Support simulated demonstrations, automated testing, real-service development, and production-oriented operation.
+
+## Architecture
+
+The platform follows a four-stage workflow.
+
+```text
+Brand Website
+      |
+      v
+1. BRAND ANALYSIS
+   Scoped crawling and profile generation
+      |
+      v
+   Human Confirmation
+      |
+      v
+2. CONTENT STRATEGY
+   Objectives, content planning and claim screening
+      |
+      v
+   Human Approval
+      |
+      v
+3. CONTENT GENERATION
+   Retrieval, LLM generation and quality validation
+      |
+      v
+   Human Approval
+      |
+      v
+4. PUBLISHING
+   WordPress integration and read-back verification
+      |
+      v
+   Publication Status and Audit Records
+
+All stages contribute to a traceable audit history.
 ```
-tenants/brands.yaml (Git)          OIDC token (sub, tenant_id, roles)
-        │                                     │
-        ▼                                     ▼
-┌─ Stage 1 ─────────────┐   ┌─ Stage 2 ─────────────┐   ┌─ Stage 3 ─────────────┐   ┌─ Stage 4 ──────────────────┐
-│ crawl brand site      │   │ strategy from         │   │ draft from strategy   │   │ reviewer approves          │
-│ (scope-pinned, SSRF   │──►│ CONFIRMED profile     │──►│ item (or free brief)  │──►│ publish → WordPress        │
-│ guard, robots, redact,│   │ + tenant RAG          │   │ redact → RAG → LLM →  │   │ (per-tenant app password)  │
-│ injection screen)     │   │ item claim screening  │   │ output screening      │   │ read-back verification     │
-│ → BrandProfile        │   │ → ContentStrategy     │   │ → Draft               │   │ → PUBLISHED (+verified)    │
-│ ✋ reviewer confirms  │   │ ✋ reviewer approves  │   │ ✋ reviewer approves  │   │ ✋ reviewer triggers       │
-└───────────────────────┘   └───────────────────────┘   └───────────────────────┘   └────────────────────────────┘
-          │                           │                           │                            │
-          └───────────── hash-chained audit records → S3 Object Lock (COMPLIANCE) ─────────────┘
-```
 
-All model calls go through one gateway (`app/llm.py`) with redaction before the
-boundary, a pinned model, Git-pinned prompts, and structured outputs that force
-the model to list what a human must verify.
+The architecture centralises model interactions through a shared gateway. This supports consistent redaction, model configuration, prompt management, structured outputs, and audit recording across the application.
 
-## Compliance status (October 2026)
+## Core Capabilities
 
-* Criteria: AICPA **2017 Trust Services Criteria with 2022 Points of Focus** — still the operative version. No AI-specific TSC exists.
-* The AICPA's 2026 exposure drafts (Feb/Mar 2026) change the **attestation standards** the auditor follows (AT-C 105/205/210), not the criteria you are measured against.
-* What changed in practice: auditors now ask for AI-specific evidence under the existing criteria — AI inventory, per-inference logs with model/prompt lineage, model-change control, subprocessor/ZDR determinations, shadow-AI detection, human-oversight records, AI incident playbooks. All 34 controls are mapped in [compliance/SOC2_CONTROL_MATRIX.md](compliance/SOC2_CONTROL_MATRIX.md).
+### 1. Brand Intelligence
 
-## Layout
+Analyse a configured public website and construct a structured brand profile that provides the foundation for subsequent content planning.
 
-| Path | Purpose |
+Key capabilities include:
+
+- Domain-scoped crawling, with crawl targets defined in version-controlled configuration rather than in API requests.
+- Respect for website crawling policies (robots.txt) and an identifying User-Agent.
+- Server-side request forgery (SSRF) safeguards.
+- Confidential-term and personal-data redaction.
+- Prompt-injection screening of retrieved pages.
+- Human confirmation of the generated brand profile.
+
+The confirmed profile becomes the starting point for brand-specific content development.
+
+### 2. Strategic Content Planning
+
+Generate a structured content strategy based on the confirmed brand profile, business objectives, and available tenant-specific knowledge.
+
+The strategy workflow supports:
+
+- Content planning over a configurable time horizon.
+- Strategy approval before content generation.
+- Screening of claims associated with proposed content.
+- Draft generation from approved strategy items.
+- Traceability between strategy decisions and generated content.
+
+### 3. AI-Powered Content Generation
+
+Generate structured marketing content through a controlled language-model gateway.
+
+The workflow incorporates retrieval-augmented generation (RAG), configurable model access, prompt versioning, redaction, and output screening.
+
+Generated content includes:
+
+- Search-optimised titles and meta descriptions.
+- Content headlines and URL slugs.
+- Primary and secondary keywords.
+- Structured headings and article body text.
+- Direct-answer sections.
+- Frequently asked questions.
+- Key takeaways.
+- Sourced factual claims.
+- Schema.org structured data.
+
+Generated material remains subject to human review before publication.
+
+### 4. SEO, AEO, and GEO Quality Validation
+
+The platform evaluates generated content against a deterministic set of content-quality criteria, so the model never grades its own output.
+
+| Optimisation area | Validation focus |
 |---|---|
-| `app/brand.py` | Stage 1: scoped crawler + brand analysis + confirmation gate |
-| `app/strategy.py` | Stage 2: strategy planning, approval, draft-from-item |
-| `app/workflow.py` | Stage 3/4: generation, review, publish with verification |
-| `app/cms.py` | WordPress REST publisher, per-tenant credentials, read-back check |
-| `app/llm.py`, `app/redaction.py`, `app/injection.py`, `app/rag.py`, `app/audit.py`, `app/auth.py` | Gateway controls shared by every stage |
-| `prompts/` | Versioned stage prompts + `manifest.json` (SHA-256 pinned, approval status) |
-| `tenants/brands.yaml` | Per-client crawl scope and WordPress URL (the only source of targets) |
-| `tenants/deny_terms.yaml` | Per-client confidential terms always redacted |
-| `tests/` | 33 control tests an auditor can watch run |
-| `compliance/` | Control matrix, system description, AI inventory, risk register, vendor assessment, model registry, monitoring, incident playbook, AI use policy, evidence schedule |
-| `infra/` | Read-only DB role + RLS, S3 Object Lock bucket (Terraform), egress allow-list |
-| `.github/` | CI gates and CODEOWNERS for prompt / model / tenant-config changes |
+| SEO — Search Engine Optimisation | Title and meta-description lengths, keyword placement, headings, content structure, word count, alt text, and sentence length |
+| AEO — Answer Engine Optimisation | Direct-answer sections, FAQ structure, and key takeaways |
+| GEO — Generative Engine Optimisation | Brand and named entities, source-backed facts, and structured data |
 
-## Zero-cost real run (learning setup)
+The validator produces a score from 0 to 100. Drafts scoring below 70 are flagged for reviewer attention. Validation findings are recorded in the generation audit record, allowing reviewers to assess the output before publication.
 
-Everything real — real crawl of a public brand site, real model, real WordPress — for $0:
+### 5. Human Review and Approval
 
-| Piece | Free option | Compliance note |
+Human oversight is an integral part of the workflow rather than an optional final check.
+
+The principal approval stages cover:
+
+1. Confirmation of the generated brand profile.
+2. Approval of the content strategy.
+3. Approval of generated content.
+4. Explicit initiation of publication.
+
+The system also requires reviewer and requester identities to differ at each approval gate, supporting separation of duties. Approvals carry a verification note, and refused actions are recorded alongside successful ones.
+
+### 6. WordPress Publishing
+
+Publish approved content through the WordPress REST API using tenant-specific credentials.
+
+Publishing capabilities include:
+
+- Dedicated publishing credentials for each tenant, used only on the publish path.
+- Support for self-hosted WordPress (application passwords) and WordPress.com (OAuth).
+- Support for configured SEO plugins, including Yoast SEO and Rank Math.
+- Transfer of approved content, slugs, and excerpts.
+- Integration of FAQ content and supported structured data.
+- Read-back verification of published content.
+- In-place re-publication when verification identifies a discrepancy.
+- Explicit publication status and audit records.
+
+Publication verification identifies cases where the final WordPress output differs from the approved content, including situations where structured data is removed during publishing.
+
+### 7. Security, Governance, and Auditability
+
+The project incorporates security and governance mechanisms informed by the SOC 2 Trust Services Criteria (2017 criteria with the 2022 points of focus) and the AI-specific evidence that auditors request in current examinations.
+
+Key controls include:
+
+- Tenant-aware authentication and authorisation.
+- Role-based workflow permissions.
+- Confidential-term and personal-data redaction before model calls.
+- Prompt-injection screening.
+- Restricted crawling and network egress controls.
+- Version-controlled prompts with integrity verification at start-up.
+- Pinned model configuration with the served model recorded per request.
+- Hash-linked audit records with chain verification.
+- Production start-up checks.
+- Documented AI inventory, risk register, vendor assessments, monitoring thresholds, and incident-response procedures.
+
+The compliance documentation maps 37 implemented controls, and the remaining planned items, to the relevant criteria — supporting further engineering, operational validation, and compliance preparation.
+
+**Compliance scope:** This is a SOC 2-aligned engineering and learning project. Its architecture and documentation support control implementation and evaluation; they do not, by themselves, constitute an independent SOC 2 Type II attestation.
+
+## Technology Stack
+
+The repository is primarily implemented in Python, with supporting HTML and infrastructure configuration.
+
+| Component | Purpose |
+|---|---|
+| Python 3.11+ | Application logic and workflow orchestration |
+| FastAPI | API endpoints and interactive demonstration interface |
+| Large language models | Brand analysis, strategic planning, and content generation |
+| Retrieval-augmented generation | Access to relevant tenant-specific context |
+| WordPress REST API | Content publication and verification |
+| PyJWT | JWT-based authentication |
+| SQLAlchemy | Workflow persistence |
+| Pytest | Automated control and application testing |
+| Docker Compose | Optional local WordPress development environment |
+| Terraform | Infrastructure configuration |
+| Amazon S3 Object Lock | Tamper-resistant audit storage |
+
+### Model Provider Options
+
+The gateway supports two providers through a single configuration setting (`AGENT_PROVIDER`).
+
+| Provider | Suited to | Notes |
 |---|---|---|
-| Model | Google AI Studio free tier: `AGENT_PROVIDER=gemini`, `GEMINI_API_KEY=…` | **Not** zero-data-retention. The agent stamps `data_retention_class=FREE_TIER_NOT_ZDR…` into the audit log and refuses this provider in `prod`. Use a public brand, never client material. |
-| Brand website | Any public site, set in `tenants/brands.yaml` | Scope pinned in Git, robots.txt honoured |
-| WordPress | Local Docker: `docker compose -f docker-compose.wordpress.yml up -d` → http://localhost:8080 | `allow_local` is granted only outside `prod` |
+| Google AI Studio (Gemini) | Learning, demonstrations, and public-brand content at no cost | Standard free-tier data-retention terms; the application records this in the audit log and restricts the provider to non-production environments |
+| Anthropic (Claude) | Client work and production | Zero-data-retention configuration available; the provider assumed by the production start-up checks |
+
+## Execution Modes
+
+The application supports different execution modes to accommodate demonstrations, testing, development, and production deployment.
+
+| Mode | Environment | Intended purpose |
+|---|---|---|
+| `demo` | Simulated model, website, and WordPress | Interactive demonstrations, training, and workflow walkthroughs |
+| `test` | Simulated dependencies | Automated tests and control verification |
+| `dev` | Real model and website; real WordPress when credentials are configured | Integration development and client-site testing |
+| `prod` | Real integrations with production security requirements | Production-oriented deployment |
+
+Simulated environments allow the complete workflow to be explored without requiring live external services. Development and production modes use real integrations when the required credentials and configuration are provided.
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.11+ and pip.
+- Git.
+- For real-model development: a Google AI Studio or Anthropic API key.
+- For live publishing: a WordPress.com site (no installation required) or a self-hosted WordPress with an application password. Docker Compose is provided for an optional local WordPress.
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/gangadeviai/soc2-content-agent.git
+```
+
+```bash
+cd soc2-content-agent
+```
+
+### 2. Install Dependencies
 
 ```bash
 pip install -e ".[dev]"
 ```
 
-Edit [.env](.env) (git-ignored): paste `GEMINI_API_KEY`, and after the WordPress install paste the Editor user's application password. Put the brand in `tenants/brands.yaml`, then:
+### 3. Configure the Environment
 
-```bash
-uvicorn app.main:app --reload
-```
-
-Open **http://localhost:8000/demo** for the walkthrough UI (or `/docs` for the raw API). Study guide: [LEARNING.md](LEARNING.md).
-
-## Offline mode (no API key, no network)
-
-```bash
-pip install -e ".[dev]"
-```
-
-```bash
-python scripts/run_demo.py
-```
-
-Open **http://localhost:8000/demo**. It runs with a simulated model, a simulated brand
-website and a simulated WordPress, so every control runs for real while nothing external is
-touched. Switch persona (requester / reviewer / admin / other tenant), walk the four stages,
-press the "Try to break it" buttons, then verify the audit chain and pull the lineage pack.
-
-For a terminal walkthrough that prints every control as it fires (good for an audit meeting):
-
-```bash
-python scripts/demo_walkthrough.py
-```
-
-| Mode (`AGENT_ENV`) | Model | Brand website | WordPress | Use |
-|---|---|---|---|---|
-| `demo` | fake | fake (`app/demo_data.py`) | fake | demos, training, audit walkthroughs |
-| `test` | fake | fake | fake | `pytest` |
-| `dev` | **Claude (real)** | **real crawl** of the domain in `tenants/brands.yaml` | **real WordPress** if `AGENT_WP_*` set, else 503 | integration with a client site |
-| `prod` | real, ZDR enforced | real | real | production; start-gate checks apply |
-
-## Run locally
-
-```bash
-pip install -e ".[dev]"
-```
+Copy the example environment file:
 
 ```bash
 cp .env.example .env
 ```
 
+Configure the required settings for your selected execution mode. Keep credentials in environment variables or a secrets manager; never commit real API keys, application passwords, or production secrets to Git.
+
+### 4. Run the Demonstration Environment
+
+```bash
+python scripts/run_demo.py
+```
+
+Open the interactive demonstration interface at `http://localhost:8000/demo`.
+
+The demonstration environment uses simulated dependencies to let you explore the workflow, approval gates, security controls, and audit functionality.
+
+For a terminal-based walkthrough that prints each control as it operates:
+
+```bash
+python scripts/demo_walkthrough.py
+```
+
+### 5. Run the Application in Development Mode
+
+Configure the model credentials in `.env`, add the brand to `tenants/brands.yaml`, then start the application:
+
 ```bash
 uvicorn app.main:app --reload
 ```
 
-Dev tokens (prod tokens come from your IdP):
+Access the interactive interface at `/demo?tenant=<tenant>` or the API documentation at `/docs`.
 
-```bash
-curl -s -X POST "localhost:8000/dev/token?sub=u1&tenant_id=client-a&roles=requester"
-```
+For live WordPress publishing, configure the tenant's publishing credentials (`AGENT_WP_USER__<TENANT>` / `AGENT_WP_APP_PASSWORD__<TENANT>`) and the `wordpress_url` in `tenants/brands.yaml`. The interface includes a one-click capture step for the WordPress.com OAuth flow.
 
-```bash
-curl -s -X POST "localhost:8000/dev/token?sub=u2&tenant_id=client-a&roles=reviewer"
-```
-
-Pipeline (requester `u1`, reviewer `u2`; reviewer must differ from requester at every gate):
-
-| Step | Call |
-|---|---|
-| 1. Analyze brand | `POST /brands/analyze` `{"notes": "..."}` |
-| 1b. Confirm profile | `POST /brands/{id}/review` `{"decision":"confirm","note":"checked with client"}` |
-| 2. Plan strategy | `POST /strategies` `{"objectives":"...","horizon_weeks":8}` |
-| 2b. Approve strategy | `POST /strategies/{id}/review` `{"decision":"approve","note":"..."}` |
-| 3. Draft an item | `POST /strategies/{id}/items/0/draft` (or `POST /drafts` with a free brief) |
-| 4a. Approve draft | `POST /review/{draft_id}` `{"decision":"approve","note":"claims verified against ..."}` |
-| 4b. Publish | `POST /review/{draft_id}/publish` → WordPress, read-back verified |
-
-Monitoring: `GET /admin/metrics`, `GET /admin/audit/verify`, `GET /healthz`.
-
-Run the control tests:
+### 6. Run the Tests
 
 ```bash
 pytest -q
 ```
 
-## SEO / AEO / GEO fitness
+The test suite evaluates application behaviour and security-related controls using simulated dependencies where appropriate.
 
-Every draft must be fit for classic search, answer engines and generative (AI) search:
+## Project Structure
 
-| Pillar | What the model must produce (`DRAFT_SCHEMA`) | What `app/seo.py` checks deterministically |
-|---|---|---|
-| **SEO** | title tag, meta description, slug, primary + secondary keywords | lengths (30-60 / 70-155), keyword in title tag, headline, slug and first 100 words, H2 structure, heading hierarchy, word count by content type, alt text, sentence length, secondary keywords used |
-| **AEO** | 30-70 word direct answer, 3-5 FAQ Q&As, 3-6 key takeaways | answer length, opening paragraph restates the answer, FAQ well-formedness, takeaway count |
-| **GEO** | canonical brand entity, named entities, ≥2 sourced quotable facts, schema.org JSON-LD | every fact carries a source, entities appear in body, valid Article (+FAQPage) JSON-LD |
+```text
+soc2-content-agent/
+├── app/
+│   ├── main.py            # FastAPI application and routes
+│   ├── brand.py           # Brand analysis and profile workflow
+│   ├── strategy.py        # Content strategy and planning
+│   ├── workflow.py        # Draft generation, review and publication workflow
+│   ├── seo.py             # SEO / AEO / GEO validation
+│   ├── cms.py             # WordPress integration
+│   ├── llm.py             # Language-model gateway and provider adapters
+│   ├── prompts.py         # Versioned prompt registry with integrity checks
+│   ├── redaction.py       # Confidential-term and personal-data handling
+│   ├── injection.py       # Prompt-injection and output screening
+│   ├── rag.py             # Retrieval-augmented generation
+│   ├── audit.py           # Audit records and chain verification
+│   ├── auth.py            # Authentication and authorisation
+│   ├── models.py          # Persistence models
+│   ├── config.py          # Settings and production start-up checks
+│   ├── demo_data.py       # Simulated website used by demo and tests
+│   └── static/demo.html   # Interactive demonstration interface
+├── compliance/
+│   ├── SOC2_CONTROL_MATRIX.md
+│   ├── SYSTEM_DESCRIPTION.md
+│   ├── AI_INVENTORY.yaml
+│   └── ...                # Risk register, vendor assessment, monitoring, incident response, policy
+├── infra/                 # Infrastructure and security configuration
+├── prompts/               # Versioned prompts and manifest
+├── scripts/               # Demonstrations and utility scripts
+├── tenants/               # Brand and tenant configuration
+├── tests/                 # Automated tests
+├── .github/               # CI workflows and repository controls
+├── .env.example
+├── .gitleaks.toml
+├── docker-compose.wordpress.yml
+├── LEARNING.md
+├── README.md
+└── pyproject.toml
+```
 
-Score 0-100; below **70** the draft is flagged. Failures never block — they're shown to the reviewer and recorded in the GENERATION audit record. On publish, slug and excerpt go natively, the FAQ is rendered into the post, JSON-LD is re-serialised and embedded, and title tag / meta description are sent to the site's SEO plugin (`seo_plugin: yoast | rankmath` in `tenants/brands.yaml`). If WordPress strips the JSON-LD (publishing user lacks `unfiltered_html`), read-back verification fails and the reviewer is told.
+## Production Readiness
 
-## WordPress setup per brand
+Production deployment requires explicit configuration and verification of the relevant security and operational controls.
 
-1. Create a dedicated WordPress user (Author or Editor role — not Administrator) on the brand's site.
-2. Generate an application password for that user.
-3. Store as `AGENT_WP_USER__<TENANT>` / `AGENT_WP_APP_PASSWORD__<TENANT>` in the secrets manager, mounted only into the publish workload.
-4. Add the brand to `tenants/brands.yaml` via PR (domain, `wordpress_url`, crawl scope).
+The application includes start-up checks for key production requirements, including zero-data-retention confirmation, configured Object Lock storage, a non-default JWT secret, a production-appropriate database, and a production-eligible model provider.
 
-## Production checklist
+Before production deployment:
 
-1. `AGENT_ENV=prod` refuses to start unless `AGENT_ZDR_CONTRACT_CONFIRMED=true`, an Object Lock bucket is configured, the JWT secret is not the dev default, and the DB is not SQLite.
-2. Switch `app/auth.py` to JWKS/RS256 verification against your IdP.
-3. Envelope-encrypt `redaction_mapping` columns with KMS.
-4. Configure the embedding provider for `PgVectorRetriever` (must also be under ZDR) and add it to `compliance/AI_INVENTORY.yaml`.
-5. Schedule the draft-retention purge job.
+- Configure an AI provider and model with suitable data-retention terms.
+- Verify all authentication and authorisation controls.
+- Integrate identity-provider verification using JWKS/RS256.
+- Configure secure storage and encryption for sensitive data.
+- Configure audit-log retention and protected storage.
+- Review tenant isolation, database permissions, and network egress.
+- Establish monitoring, incident response, and retention procedures.
+- Review all documented control gaps and assign remediation responsibilities.
 
-See the "Known gaps" table in the control matrix for owners and targets.
+Provider eligibility, contractual requirements, and deployment configuration must be verified independently before processing confidential client information.
 
-## Model note
+## Learning and Documentation
 
-The service pins `claude-opus-5-5` and enables Anthropic's server-side refusal
-fallback (`fallbacks: "default"`). When a fallback model serves a request, the
-audit record stores both `model_requested` and `model_served` and the artefact gets a
-`MODEL_FALLBACK` flag for the reviewer. Changing the model or disabling fallback is a
-change-managed event recorded in `compliance/MODEL_REGISTRY.md`. Claude Fable 5.1 is
-not eligible for Zero Data Retention by default, so moving to it requires a fresh
-vendor assessment.
+The repository includes supporting materials for understanding the design decisions and control implementation.
+
+- `LEARNING.md` — learning guide: SOC 2 Type II concepts mapped to this codebase, and how to practise an observation period.
+- `compliance/SOC2_CONTROL_MATRIX.md` — control mapping, implementation status, and field notes.
+- `compliance/SYSTEM_DESCRIPTION.md` — system description in the structure auditors expect.
+- `compliance/AI_INVENTORY.yaml` — AI system inventory.
+- `compliance/` — risk register, vendor assessment, model registry, monitoring thresholds, incident-response playbook, acceptable-use policy, and evidence schedule.
+- `tests/` — automated tests covering application and control behaviour.
+
+## Project Objectives
+
+This project explores how AI-driven content production can be combined with structured human oversight, tenant isolation, security controls, and auditable operations.
+
+Its primary objectives are to:
+
+1. Automate repetitive marketing content workflows without removing human accountability.
+2. Improve the consistency of SEO, AEO, and GEO content validation.
+3. Establish traceability between AI-generated outputs, reviewer decisions, and publishing actions.
+4. Apply security engineering principles to AI-assisted content operations.
+5. Provide a practical foundation for evaluating governance and compliance controls in AI-agent systems.
+
+## Disclaimer
+
+This repository is an engineering and learning project. The presence of documented or implemented controls does not guarantee regulatory compliance, eliminate security risks, or establish independent certification. Production use requires deployment-specific testing, security review, and appropriate compliance assessment.
+
+## License
+
+See the repository's license information for applicable usage and distribution terms.
