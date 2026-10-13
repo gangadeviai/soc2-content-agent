@@ -8,6 +8,32 @@ The platform transforms a brand's website into a structured content foundation, 
 
 > **Verified run (12 October 2026):** the complete workflow was exercised end-to-end against live services — a public brand website, a hosted language model, and a WordPress.com site — with every approval gate, the SEO/AEO/GEO validator (100/100 on the published article), read-back verification, and the hash-linked audit trail operating as designed. One publication exception was detected by the verifier, remediated, and re-published in place; the episode is documented under control C-37 in the control matrix.
 
+## Showcase — real runs, real evidence
+
+Two public brands were run through the full pipeline against live services (public website crawl,
+hosted model, WordPress.com publishing). Every figure below was produced by the application and is
+reproducible from the files in [`docs/showcase/`](docs/showcase/); the rules behind each metric are in
+[`docs/showcase/METHODOLOGY.md`](docs/showcase/METHODOLOGY.md).
+
+| Run | Brand analysed | Published article | SEO/AEO/GEO | Words | Read-back verified | Evidence pack |
+|---|---|---|---|---|---|---|
+| 13 Oct 2026 | [aspendental.com](https://www.aspendental.com) — US dental network | [Dentures vs Dental Implants: Finding Your Best Restorative Path](https://gangadeviai.wordpress.com/2026/10/13/dentures-vs-dental-implants-guide/) | **97 / 100** (21 of 22 checks) | 716 | ✅ | [`docs/showcase/aspendental/`](docs/showcase/aspendental/) |
+| 12 Oct 2026 | [firepencil.ai](https://firepencil.ai) — AEO SaaS | [Beyond Traditional SEO: Why Brands Must Adapt to Autonomous Answer Engine Optimization](https://gangadeviai.wordpress.com/2026/10/12/autonomous-answer-engine-optimization-guide/) | **100 / 100** (22 of 22) | 619 | ✅ after one flagged, remediated attempt | [`docs/showcase/learn/`](docs/showcase/learn/) |
+
+What the evidence shows, beyond the score:
+
+- **Human gates operated:** three approvals per run (brand profile, strategy, article), each by a reviewer who was not the requester, each with a note and an audit hash.
+- **Honest model lineage:** during the Aspen Dental run the primary model was saturated; the brand profile records `model_served = gemini-3.1-flash-lite` with a `MODEL_FALLBACK` flag, while the article records `gemini-3.8-flash`. Nothing is attributed to a model that did not produce it.
+- **Exceptions on the record:** the first FirePencil publish failed read-back verification (WordPress.com stripped the JSON-LD script); the fix and the in-place re-publish are both in the audit chain and under control C-37. The Aspen Dental article's one failed check (`entities_named_in_body`) is shown to the reviewer rather than hidden.
+- **Integrity verified:** the audit chain re-hashed cleanly (35 records at the time of export) and the live post hash matched the approved hash.
+
+<p align="center">
+  <img src="docs/showcase/screenshots/governance-overview.jpg" alt="Governance overview: metrics with stated sources and audit-chain status" width="49%">
+  <img src="docs/showcase/screenshots/governance-approvals.jpg" alt="Approval history with requester and reviewer side by side" width="49%">
+  <img src="docs/showcase/screenshots/governance-evidence.jpg" alt="Publication evidence: approved hash vs live hash, verified" width="49%">
+  <img src="docs/showcase/screenshots/governance-controls.jpg" alt="Control mapping read from controls.yaml with status counts" width="49%">
+</p>
+
 ## Project Highlights
 
 - **End-to-end content automation:** Connect brand analysis, content strategy, AI-assisted writing, editorial review, and WordPress publishing in one workflow.
@@ -197,6 +223,17 @@ The gateway supports two providers through a single configuration setting (`AGEN
 |---|---|---|
 | Google AI Studio (Gemini) | Learning, demonstrations, and public-brand content at no cost | Standard free-tier data-retention terms; the application records this in the audit log and restricts the provider to non-production environments |
 | Anthropic (Claude) | Client work and production | Zero-data-retention configuration available; the provider assumed by the production start-up checks |
+
+## Workspaces
+
+The interface is split into two destinations with a shared top navigation.
+
+| Workspace | Route | Audience | What it shows |
+|---|---|---|---|
+| **Content Workspace** | `/demo?tenant=<tenant>` | Requesters, reviewers | The four-stage workflow: brand analysis, strategy, drafting with the SEO/AEO/GEO score, review and publication, plus "try to break it" actions that exercise the controls |
+| **Governance Workspace** | `/governance?tenant=<tenant>` | Reviewers, administrators, compliance stakeholders | Operational evidence: overview metrics (each with its source), approval history with requester and reviewer side by side, the hash-chained audit trail with record detail, explicit integrity verification (not performed / verified / failed / unavailable), security events derived from recorded audit events, publication evidence (approved → published → verified), and the control mapping read from `compliance/controls.yaml` |
+
+Access is enforced server-side: reviewers can read approvals and publication evidence for their tenant; administrators additionally read the audit trail, security events and system records; any authenticated user can read the control mapping. Everything is tenant-scoped, outputs are allow-listed field by field, and viewing never writes audit records. In `demo` and `test` modes the Governance Workspace shows a visible **SIMULATED DATA** banner.
 
 ## Execution Modes
 

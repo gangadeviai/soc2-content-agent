@@ -24,6 +24,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -34,6 +35,11 @@ from .config import Settings
 from .prompts import PromptBundle
 
 _OBVIOUS_SECRET = re.compile(r"(sk-ant-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----)")
+
+
+class ProviderUnavailableError(RuntimeError):
+    """The model provider failed repeatedly with a transient error (rate limit, overload, network)."""
+
 
 CONTENT_TYPES = ("blog_post", "landing_page", "email", "social_post", "press_release")
 
@@ -351,18 +357,29 @@ class GeminiClient:
                 "temperature": 0.4,
             },
         }
-        resp = self._client.post(self.ENDPOINT.format(model=self.settings.gemini_model), json=body)
-        resp.raise_for_status()
+        # Primary model first; Git-pinned fallbacks only when it is transiently unavailable. The
+        # model that actually answered is recorded in lineage; a fallback flags the artefact.
+        chain = [self.settings.gemini_model, *self.settings.gemini_fallback_models]
+        failures: list[str] = []
+        for model in chain:
+            try:
+                resp = self._post_with_retry(self.ENDPOINT.format(model=model), body)
+                break
+            except ProviderUnavailableError as exc:
+                failures.append(str(exc))
+        else:
+            raise ProviderUnavailableError("; ".join(failures))
+        served = model
         payload = resp.json()
         usage = payload.get("usageMetadata", {})
         candidates = payload.get("candidates") or []
         if not candidates:  # whole prompt blocked
             reason = (payload.get("promptFeedback") or {}).get("blockReason", "unknown")
-            return self._result({}, "refusal", str(reason), payload, usage)
+            return self._result({}, "refusal", str(reason), payload, usage, served)
         cand = candidates[0]
         finish = cand.get("finishReason", "STOP")
         if finish in {"SAFETY", "PROHIBITED_CONTENT", "RECITATION", "BLOCKLIST", "SPII"}:
-            return self._result({}, "refusal", finish, payload, usage)
+            return self._result({}, "refusal", finish, payload, usage, served)
         if finish == "MAX_TOKENS":
             raise RuntimeError("generation truncated (MAX_TOKENS) - increase AGENT_MAX_OUTPUT_TOKENS")
         parts = (cand.get("content") or {}).get("parts") or []
@@ -370,13 +387,40 @@ class GeminiClient:
         text = "".join(p.get("text", "") for p in parts if not p.get("thought"))
         if not text.strip():
             raise RuntimeError(f"Gemini returned no answer text (finishReason={finish})")
-        return self._result(json.loads(text), "end_turn", None, payload, usage)
+        return self._result(json.loads(text), "end_turn", None, payload, usage, served)
 
-    def _result(self, data: dict, stop: str, refusal: str | None, payload: dict, usage: dict) -> LLMResult:
+    _RETRY_STATUSES = {429, 500, 502, 503, 504}
+    _BACKOFF_SECONDS = (2, 5, 10)  # 4 attempts in total
+
+    def _post_with_retry(self, url: str, body: dict) -> httpx.Response:
+        """Transient provider errors (rate limit, overload) are retried with backoff; anything else
+        (4xx = our request is wrong) is raised immediately. Exhausted retries raise
+        ProviderUnavailableError, which the API maps to a clean 503 and an audit record."""
+        last: str = ""
+        attempts = 0
+        for pause in (*self._BACKOFF_SECONDS, None):
+            attempts += 1
+            try:
+                resp = self._client.post(url, json=body)
+            except httpx.TransportError as exc:  # connect/read timeouts count as transient
+                last = f"{type(exc).__name__}"
+            else:
+                if resp.status_code not in self._RETRY_STATUSES:
+                    resp.raise_for_status()
+                    return resp
+                last = f"HTTP {resp.status_code}"
+            if pause is None:
+                break
+            time.sleep(pause)
+        raise ProviderUnavailableError(
+            f"{url.rsplit('/', 1)[-1].split(':')[0]} returned {last} after {attempts} attempts"
+        )
+
+    def _result(self, data: dict, stop: str, refusal: str | None, payload: dict, usage: dict, served: str) -> LLMResult:
         return LLMResult(
             data=data,
             model_requested=self.settings.gemini_model,
-            model_served=payload.get("modelVersion", self.settings.gemini_model),
+            model_served=payload.get("modelVersion", served),
             stop_reason=stop,
             refusal_category=refusal,
             usage={
@@ -386,7 +430,7 @@ class GeminiClient:
                 "thinking_tokens": usage.get("thoughtsTokenCount", 0),
             },
             provider_request_id=payload.get("responseId"),
-            fallback_used=False,
+            fallback_used=served != self.settings.gemini_model,
         )
 
 

@@ -1,0 +1,395 @@
+{
+  "tenant": "learn",
+  "exported_at": "2026-10-13T14:12:23.909051+00:00",
+  "note": "Exported from stored records of an earlier run; no content was regenerated.",
+  "environment": {
+    "status": "ok",
+    "audit_records_verified": 35,
+    "prompt_version": "1.2.0",
+    "provider": "gemini",
+    "model": "gemini-3.8-flash",
+    "data_retention_class": "FREE_TIER_NOT_ZDR_MAY_BE_USED_FOR_TRAINING",
+    "env": "dev"
+  },
+  "stages": {
+    "brand_analysis": {
+      "profile_id": "61f2c2b4-c848-4574-af8e-9d04c3f57d46",
+      "version": 1,
+      "pages_used": [
+        "https://firepencil.ai/",
+        "https://firepencil.ai/blog/",
+        "https://firepencil.ai/grader/",
+        "https://firepencil.ai/llms-txt-generator/",
+        "https://firepencil.ai/contact/?subject=Partner+with+us",
+        "https://firepencil.ai/contact/",
+        "https://firepencil.ai/case-studies/",
+        "https://firepencil.ai/get-recommended-by-chatgpt/",
+        "https://firepencil.ai/beacon-law-firms/",
+        "https://firepencil.ai/privacy-policy.html"
+      ],
+      "brand_name": "FirePencil.AI",
+      "positioning": "FirePencil.AI positions itself as the world's first autonomous Answer Engine Optimization (AEO) agent designed for businesses\u2014particularly across legal, healthcare, D2C, real estate, and B2B SaaS\u2014as well as marketing agencies. Unlike static dashboard reporting tools, FirePencil actively executes site fixes, content creation, schema, and citation management at the server level on a 24/7 basis, bundling agentic automation with an autopilot SEO foundation so brands are both found by search engines and cited by generative AI assistants like ChatGPT, Gemini, and Perplexity.",
+      "voice": [
+        "Assertive: Frames the shift to AI search as an urgent transition, warning that 'every month you wait, your customer is handed to a competitor.'",
+        "Pragmatic: Emphasizes tangible execution over vanity metrics, explicitly contrasting its software with 'unverifiable retainer-ware' and passive reporting.",
+        "Authoritative: Backs recommendations with structured methodologies such as the 12-pillar BEACON framework and proprietary prompt analyses.",
+        "Transparent: Openly presents framework limitations and licensing (CC BY 4.0), noting that organic AI citations cannot be paid for or guaranteed."
+      ],
+      "observations_to_confirm": [
+        "Should the go-to-market messaging prioritize the legal sector given that the published BEACON framework and research specifically focus on law firms, or should equal emphasis be maintained across all six listed verticals?",
+        "How should the commercial pricing structure be communicated once the 12-week free trial concludes, given that specific subscription tiers are not published on the site?",
+        "Is the agent's server-level execution fully automated or does it require manual developer intervention during integration on client host environments?",
+        "Should agency partner messaging emphasize white-labeling the audit tool specifically or positioning the entire autonomous agent under agency brand names?"
+      ],
+      "review_flags": [
+        "skipped out-of-scope url https://cdn.tailwindcss.com",
+        "skipped out-of-scope url https://fonts.googleapis.com",
+        "skipped out-of-scope url https://fonts.gstatic.com",
+        "skipped out-of-scope url https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap",
+        "skipped out-of-scope url https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..500,0,0",
+        "skipped out-of-scope url https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap",
+        "skipped out-of-scope url https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap",
+        "context capped after 10 pages"
+      ],
+      "model_served": "gemini-3.8-flash"
+    },
+    "strategy": {
+      "strategy_id": "4554579e-7217-4475-832c-9d6eb0468329",
+      "pillars": [
+        "Autonomous AEO & Technical Foundations",
+        "Legal Sector AI Visibility & Compliance",
+        "Agency Growth & Productized AEO Retainers"
+      ],
+      "calendar": [
+        {
+          "week": 1,
+          "content_type": "blog_post",
+          "working_title": "Beyond Traditional SEO: Why Brands Must Adapt to Autonomous Answer Engine Optimization",
+          "target_keyword": "answer engine optimization"
+        },
+        {
+          "week": 2,
+          "content_type": "landing_page",
+          "working_title": "Free llms.txt Generator: Prepare Your Web Architecture for AI Crawlers",
+          "target_keyword": "llms txt generator"
+        },
+        {
+          "week": 3,
+          "content_type": "blog_post",
+          "working_title": "Ethical AI Citations for Law Firms: Applying the 12-Pillar BEACON Framework",
+          "target_keyword": "law firm AI visibility"
+        },
+        {
+          "week": 4,
+          "content_type": "social_post",
+          "working_title": "Why AI Referral Traffic Converts 4.4x Higher Than Organic Search",
+          "target_keyword": "AI referral traffic conversion"
+        },
+        {
+          "week": 5,
+          "content_type": "blog_post",
+          "working_title": "Retire Retainer-Ware: How Agencies Can Productize AEO into High-Value Services",
+          "target_keyword": "white label AEO agency"
+        },
+        {
+          "week": 6,
+          "content_type": "email",
+          "working_title": "From 0/100 to 98/100: How Technical Foundations Restore AI Discoverability",
+          "target_keyword": "AEO case study"
+        },
+        {
+          "week": 7,
+          "content_type": "blog_post",
+          "working_title": "Prompt Fan-Outs Explained: What 200 Buyer Prompts Reveal About Vertical Brand Selection",
+          "target_keyword": "buyer prompt tracking"
+        },
+        {
+          "week": 8,
+          "content_type": "landing_page",
+          "working_title": "FirePencil Autonomous AEO Agent: Continuous 24/7 AI Engine Optimization",
+          "target_keyword": "autonomous AEO agent"
+        }
+      ],
+      "review_flags": [
+        "item 0: UNSOURCED_STATISTIC: '15%'",
+        "item 1: ABSOLUTE_CLAIM: 'guaranteed'",
+        "item 1: UNSOURCED_STATISTIC: '115%'",
+        "item 2: ABSOLUTE_CLAIM: 'guaranteed'",
+        "item 5: ABSOLUTE_CLAIM: 'guaranteed'",
+        "item 7: UNSOURCED_STATISTIC: '115%'"
+      ]
+    },
+    "draft": {
+      "draft_id": "41bd3c9b-eddd-45d1-ac96-f62f23b8bb2d",
+      "title": "Beyond Traditional SEO: Why Brands Must Adapt to Autonomous Answer Engine Optimization",
+      "words": 619,
+      "seo_aeo_geo_score": 100,
+      "threshold": 70,
+      "checks_passed": 22,
+      "checks_total": 22,
+      "checks": [
+        {
+          "pillar": "SEO",
+          "name": "title_tag_length",
+          "passed": true,
+          "detail": "53 chars (want 30-60)"
+        },
+        {
+          "pillar": "SEO",
+          "name": "meta_description_length",
+          "passed": true,
+          "detail": "143 chars (want 70-155)"
+        },
+        {
+          "pillar": "SEO",
+          "name": "primary_keyword_present",
+          "passed": true,
+          "detail": "answer engine optimization"
+        },
+        {
+          "pillar": "SEO",
+          "name": "keyword_in_title_tag",
+          "passed": true,
+          "detail": "'answer engine optimization' in title tag"
+        },
+        {
+          "pillar": "SEO",
+          "name": "keyword_in_headline",
+          "passed": true,
+          "detail": "'answer engine optimization' in headline"
+        },
+        {
+          "pillar": "SEO",
+          "name": "keyword_in_first_100_words",
+          "passed": true,
+          "detail": "'answer engine optimization' in opening"
+        },
+        {
+          "pillar": "SEO",
+          "name": "slug_format",
+          "passed": true,
+          "detail": "'autonomous-answer-engine-optimization-guide' (lowercase-hyphenated, <=75 chars, contains keyword)"
+        },
+        {
+          "pillar": "SEO",
+          "name": "h2_structure",
+          "passed": true,
+          "detail": "4 H2 headings (want >=2)"
+        },
+        {
+          "pillar": "SEO",
+          "name": "heading_hierarchy",
+          "passed": true,
+          "detail": "no skipped heading levels"
+        },
+        {
+          "pillar": "SEO",
+          "name": "single_h1",
+          "passed": true,
+          "detail": "0 H1 in body (title is the H1)"
+        },
+        {
+          "pillar": "SEO",
+          "name": "word_count",
+          "passed": true,
+          "detail": "620 words (want 600-2200 for blog_post)"
+        },
+        {
+          "pillar": "SEO",
+          "name": "image_alt_text",
+          "passed": true,
+          "detail": "0 images without alt"
+        },
+        {
+          "pillar": "SEO",
+          "name": "readability_sentence_length",
+          "passed": true,
+          "detail": "avg 15.9 words/sentence (want <=22)"
+        },
+        {
+          "pillar": "SEO",
+          "name": "secondary_keywords_used",
+          "passed": true,
+          "detail": "4 secondary keywords, all used in body"
+        },
+        {
+          "pillar": "AEO",
+          "name": "direct_answer_length",
+          "passed": true,
+          "detail": "47 words (want 30-70)"
+        },
+        {
+          "pillar": "AEO",
+          "name": "answer_up_front",
+          "passed": true,
+          "detail": "opening paragraph restates the direct answer"
+        },
+        {
+          "pillar": "AEO",
+          "name": "faq_quality",
+          "passed": true,
+          "detail": "3/3 well-formed Q&A (want >=3)"
+        },
+        {
+          "pillar": "AEO",
+          "name": "key_takeaways",
+          "passed": true,
+          "detail": "4 takeaways (want 3-6)"
+        },
+        {
+          "pillar": "GEO",
+          "name": "sourced_quotable_facts",
+          "passed": true,
+          "detail": "3/3 facts carry a source (want >=2, all sourced)"
+        },
+        {
+          "pillar": "GEO",
+          "name": "brand_entity_consistency",
+          "passed": true,
+          "detail": "brand entity 'FirePencil.AI' named in body and direct answer"
+        },
+        {
+          "pillar": "GEO",
+          "name": "entities_named_in_body",
+          "passed": true,
+          "detail": "5 entities, all present in body"
+        },
+        {
+          "pillar": "GEO",
+          "name": "schema_org_jsonld",
+          "passed": true,
+          "detail": "valid JSON-LD with ['Article', 'FAQPage']"
+        }
+      ],
+      "seo": {
+        "title_tag": "Autonomous Answer Engine Optimization | FirePencil.AI",
+        "meta_description": "Discover why answer engine optimization is vital as search shifts to AI. Protect high-intent demand and test your site with our Free AEO Audit.",
+        "slug": "autonomous-answer-engine-optimization-guide",
+        "primary_keyword": "answer engine optimization",
+        "secondary_keywords": [
+          "AI visibility",
+          "generative AI assistants",
+          "schema markup",
+          "llms.txt"
+        ]
+      },
+      "direct_answer": "Answer engine optimization (AEO) structures website content, technical schema, and entity authority so generative AI assistants recommend your business. FirePencil.AI provides autonomous, server-level AEO execution on top of traditional SEO foundations, ensuring your brand earns verifiable citations across conversational search platforms like ChatGPT, Gemini, and Perplexity.",
+      "faq_count": 3,
+      "quotable_facts": [
+        {
+          "fact": "Brands are losing 5\u201315% of high-intent demand to AI-cited competitors who optimize for answer engines.",
+          "source": "https://firepencil.ai/"
+        },
+        {
+          "fact": "AI referral traffic converts at roughly 4.4\u00d7 the rate of organic search.",
+          "source": "https://firepencil.ai/case-studies/"
+        },
+        {
+          "fact": "Structured, schema-rich content can lift AI visibility by up to 115%.",
+          "source": "https://firepencil.ai/case-studies/"
+        }
+      ],
+      "claims_to_verify": [
+        "Brands are losing 5\u201315% of high-intent demand to AI-cited competitors.",
+        "AI referral traffic converts at roughly 4.4\u00d7 the rate of organic search.",
+        "Structured, schema-rich content can lift AI visibility by up to 115%.",
+        "FirePencil.AI platform features 256-bit encryption and owner-approved execution workflows."
+      ],
+      "review_flags": [
+        "UNSOURCED_STATISTIC: '15%'",
+        "UNSOURCED_STATISTIC: '115%'"
+      ],
+      "lineage": {
+        "prompt_version": "1.2.0",
+        "model_served": "gemini-3.8-flash",
+        "strategy_id": "4554579e-7217-4475-832c-9d6eb0468329"
+      }
+    },
+    "publish": {
+      "status": "published",
+      "published_url": "https://gangadeviai.wordpress.com/2026/10/12/autonomous-answer-engine-optimization-guide/",
+      "remote_post_id": "6",
+      "read_back_verified": true
+    }
+  },
+  "governance": {
+    "approvals": [
+      {
+        "ts": "2026-10-10T01:27:49.748540+00:00",
+        "stage": "draft",
+        "requester_id": "maya",
+        "reviewer_id": "sam",
+        "decision": "approve",
+        "separation_of_duties": true
+      },
+      {
+        "ts": "2026-10-10T01:26:09.961430+00:00",
+        "stage": "strategy",
+        "requester_id": "maya",
+        "reviewer_id": "sam",
+        "decision": "approve",
+        "separation_of_duties": true
+      },
+      {
+        "ts": "2026-10-10T01:24:57.873636+00:00",
+        "stage": "brand_profile",
+        "requester_id": "maya",
+        "reviewer_id": "sam",
+        "decision": "confirm",
+        "separation_of_duties": true
+      }
+    ],
+    "integrity": {
+      "status": "verified",
+      "records_checked": 35,
+      "checked_at": "2026-10-13T14:12:23.908054+00:00"
+    },
+    "publication_evidence": {
+      "draft_id": "41bd3c9b-eddd-45d1-ac96-f62f23b8bb2d",
+      "title": "Beyond Traditional SEO: Why Brands Must Adapt to Autonomous Answer Engine Optimization",
+      "state": "published_verified",
+      "approved_by": "sam",
+      "approved_at": "2026-10-10T01:27:49.748540+00:00",
+      "approval_audit_hash": "6d98508d130be6f2aec3c1800f67d5f24e2c596bfe3bbac794bd2d0c8d94a556",
+      "publish_attempts": 2,
+      "published_at": "2026-10-12T17:21:38.161509+00:00",
+      "published_url": "https://gangadeviai.wordpress.com/2026/10/12/autonomous-answer-engine-optimization-guide/",
+      "remote_post_id": "6",
+      "approved_body_sha256": "71abe58e71201c33675fd9283c7fa7ee58b3e7f76cc22f007529c46ff36a4cbb",
+      "published_html_sha256": "6bceaec5397530121c7b8054b47719e653caabd5c2bf777ec74e5330aec960ac",
+      "verified": true,
+      "verification_note": "live content matches approved content",
+      "republished": true,
+      "publish_audit_hashes": [
+        "dfba919af3f433be8e89d0c1ff9068727a03ecd6dd5e443ea220752790547c46",
+        "3492dbc56bffb50d7f751b77cf8c2a11c3b6045461d9293daf1469d086d7fc57"
+      ]
+    },
+    "audit_lineage_for_article": [
+      {
+        "ts": "2026-10-10T01:26:39.553437+00:00",
+        "event": "GENERATION",
+        "actor": "maya",
+        "hash": "afce2857d129624a"
+      },
+      {
+        "ts": "2026-10-10T01:27:49.748540+00:00",
+        "event": "REVIEW",
+        "actor": "sam",
+        "hash": "6d98508d130be6f2"
+      },
+      {
+        "ts": "2026-10-12T17:18:11.183582+00:00",
+        "event": "PUBLISH",
+        "actor": "sam",
+        "hash": "dfba919af3f433be"
+      },
+      {
+        "ts": "2026-10-12T17:21:38.161509+00:00",
+        "event": "PUBLISH",
+        "actor": "sam",
+        "hash": "3492dbc56bffb50d"
+      }
+    ]
+  }
+}

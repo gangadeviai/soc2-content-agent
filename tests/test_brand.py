@@ -19,6 +19,46 @@ def test_crawl_stays_in_scope_and_honours_robots():
     assert any("out-of-scope" in n for n in notes)
 
 
+def test_crawl_survives_slow_or_refused_pages():
+    import httpx
+
+    from app.brand import CrawlPolicyError
+
+    class FlakyFetcher(FakeFetcher):
+        def get(self, url):
+            if url.endswith("/products"):
+                raise httpx.ConnectTimeout("timed out")
+            if url.endswith("/about"):
+                raise CrawlPolicyError("host resolves to non-public address")
+            return super().get(url)
+
+    pages, notes = crawl(CFG, FlakyFetcher(DEMO_SITE))
+    urls = {p.url for p in pages}
+    assert "https://client-a.example/" in urls  # crawl continued past the failures
+    assert any("fetch failed https://client-a.example/products: ConnectTimeout" in n for n in notes)
+    assert any(n.startswith("policy refused https://client-a.example/about") for n in notes)
+
+
+def test_crawl_host_must_stay_inside_domain_and_is_used_as_start():
+    cfg = BrandConfig.from_yaml(
+        "t",
+        {
+            "domain": "client-a.example",
+            "wordpress_url": "https://client-a.example",
+            "crawl_host": "www.client-a.example",
+        },
+    )
+    assert cfg.effective_crawl_host == "www.client-a.example"
+    fetcher = FakeFetcher(
+        {k.replace("https://client-a.example", "https://www.client-a.example"): v for k, v in DEMO_SITE.items()}
+    )
+    pages, _ = crawl(cfg, fetcher)
+    assert any(p.url.startswith("https://www.client-a.example/") for p in pages)
+    bad = BrandConfig("t", "client-a.example", "https://client-a.example", crawl_host="evil.example")
+    with pytest.raises(CrawlPolicyError, match="outside domain"):
+        crawl(bad, fetcher)
+
+
 def test_path_prefix_and_host_rules():
     cfg = BrandConfig("t", "brand.example", "https://brand.example", ("/blog",))
     assert url_allowed("https://www.brand.example/blog/post", cfg)
@@ -32,6 +72,16 @@ def test_path_prefix_and_host_rules():
 def test_ssrf_guard_rejects_private_targets(host):
     with pytest.raises(CrawlPolicyError):
         assert_public_host(host)
+
+
+def test_ssrf_guard_judges_the_ipv4_embedded_in_nat64_and_mapped_addresses():
+    from app.brand import is_public_ip
+
+    assert is_public_ip("64:ff9b::5db2:c7a2")  # NAT64 of 93.178.199.162 (public)
+    assert not is_public_ip("64:ff9b::a00:1")  # NAT64 of 10.0.0.1 (private)
+    assert not is_public_ip("::ffff:127.0.0.1")  # IPv4-mapped loopback
+    assert is_public_ip("::ffff:8.8.8.8")
+    assert not is_public_ip("fe80::1") and not is_public_ip("::1")
 
 
 def test_brand_analysis_requires_configured_tenant(client):

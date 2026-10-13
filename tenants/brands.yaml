@@ -21,6 +21,17 @@ learn:
   wordpress_platform: wordpress_com
   publish_domain: gangadeviai.wordpress.com
 
+# --- Showcase tenant: a well-known US dental brand (public website). Publishes to the owner's own blog. ---
+aspendental:
+  domain: aspendental.com                 # scope: this domain and its subdomains
+  crawl_host: www.aspendental.com         # the apex host does not serve the site; start on www
+  seed_paths: ["/", "/dental-services", "/about-us", "/pricing-offers"]
+  allowed_path_prefixes: ["/"]
+  max_pages: 12
+  wordpress_url: https://gangadeviai.wordpress.com
+  wordpress_platform: wordpress_com
+  publish_domain: gangadeviai.wordpress.com
+
 # --- Demo/test tenants used by the offline test-suite ---
 client-a:
   domain: client-a.example

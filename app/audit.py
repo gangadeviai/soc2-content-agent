@@ -88,6 +88,14 @@ class AuditSink:
                     last = line
         return json.loads(last)["record_hash"] if last else "GENESIS"
 
+    def read_all(self) -> list[dict]:
+        """Read-only view of the local mirror (oldest first). Used by governance views;
+        never used to write or alter records."""
+        if not self.path.exists():
+            return []
+        with self.path.open("r", encoding="utf-8") as fh:
+            return [json.loads(line) for line in fh if line.strip()]
+
     def verify_chain(self) -> tuple[bool, int]:
         """Walk the local mirror and recompute every hash. Returns (ok, records_checked)."""
         prev = "GENESIS"

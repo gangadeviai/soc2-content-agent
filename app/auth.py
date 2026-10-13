@@ -59,10 +59,29 @@ def decode_token(token: str, settings: Settings) -> Principal:
 
 
 def current_principal(
+    request: Request,
     creds: HTTPAuthorizationCredentials = Depends(_bearer),
     settings: Settings = Depends(get_settings),
 ) -> Principal:
-    return decode_token(creds.credentials, settings)
+    try:
+        return decode_token(creds.credentials, settings)
+    except HTTPException as exc:
+        # Authentication failures are security events (CC6.1 / CC7.2). The token itself is
+        # never recorded - only the validation reason and the path.
+        sink = getattr(request.app.state, "audit", None)
+        if sink is not None and exc.status_code == status.HTTP_401_UNAUTHORIZED:
+            from .audit import AuditRecord
+
+            sink.write(
+                AuditRecord(
+                    "AUTH_FAILED",
+                    "anonymous",
+                    "*",
+                    None,
+                    {"reason": str(exc.detail)[:200], "path": request.url.path},
+                )
+            )
+        raise
 
 
 def require_role(role: str):

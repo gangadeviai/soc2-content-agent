@@ -45,7 +45,8 @@
 </head>
 <body>
 <header>
-  <h1>SOC 2-ready Marketing Content Agent</h1>
+  <h1>Content Agent · <span style="font-weight:400">Content Workspace</span></h1>
+  <a id="govLink" href="/governance" style="color:#93c5fd;text-decoration:none;font-size:13px">Governance Workspace →</a>
   <span class="env" id="env">loading…</span>
   <div class="persona">
     <span class="muted" style="color:#cbd5e1">Acting as:</span>
@@ -136,6 +137,7 @@
 // Tenant comes from the URL (?tenant=learn); it must exist in tenants/brands.yaml.
 const TENANT = new URLSearchParams(location.search).get("tenant") || localStorage.getItem("lastTenant") || "client-a";
 try { localStorage.setItem("lastTenant", TENANT); } catch {}
+document.getElementById("govLink").href = `/governance?tenant=${encodeURIComponent(TENANT)}`;
 const PERSONAS = {
   requester: {sub:"maya", tenant:TENANT, roles:"requester", label:`Maya (requester, ${TENANT})`},
   reviewer:  {sub:"sam",  tenant:TENANT, roles:"reviewer",  label:`Sam (reviewer, ${TENANT})`},

@@ -1,0 +1,360 @@
+{
+  "tenant": "aspendental",
+  "started_at": "2026-10-13T14:05:54.251338+00:00",
+  "stages": {
+    "brand_analysis": {
+      "profile_id": "4b083602-964d-45ae-9b39-af197e98f07e",
+      "version": 1,
+      "pages_used": [
+        "https://www.aspendental.com/"
+      ],
+      "brand_name": "Aspen Dental",
+      "positioning": "Aspen Dental is a national network of dental practices providing comprehensive oral health services, including general dentistry, dentures, and implants. The brand differentiates itself by focusing on accessibility and patient-centric care, aiming to remove barriers to treatment through a wide network of local offices and a commitment to making dental care affordable and convenient for adults.",
+      "voice": [
+        "Approachable: Uses plain, non-clinical language to explain complex procedures.",
+        "Empathetic: Focuses on the patient's comfort and emotional well-being, describing their mission as providing 'a better way to care'.",
+        "Professional: Maintains a clear, structured presentation of services and office information."
+      ],
+      "audiences": [
+        {
+          "segment": "Adults seeking restorative dentistry",
+          "needs": "Reliable, affordable solutions for tooth loss, such as dentures and implants."
+        },
+        {
+          "segment": "General dental patients",
+          "needs": "Convenient access to routine cleanings, exams, and preventative care."
+        }
+      ],
+      "proof_points": [
+        "Wide network of local dental offices.",
+        "Focus on providing affordable dental care.",
+        "Comprehensive range of services from routine to restorative."
+      ],
+      "observations_to_confirm": [
+        "Is the brand's primary strategic focus currently on restorative dentistry (dentures/implants) over general preventative care?",
+        "Should we emphasize the 'network' aspect of the brand to highlight scalability, or focus on the 'local office' feel to emphasize community trust?",
+        "Are there specific clinical disclaimers or regulatory language required for state-specific dental boards that should be standard in all marketing materials?"
+      ],
+      "review_flags": [
+        "skipped out-of-scope url https://dev.visualwebsiteoptimizer.com",
+        "skipped out-of-scope url https://cdn.bfldr.com",
+        "skipped out-of-scope url https://www.google.com/maps/search/?api=1&amp;query=Aspen Dental, 552 Stillwater Ave, Bangor, ME 04401",
+        "context capped after 1 pages",
+        "MODEL_FALLBACK: served by gemini-3.1-flash-lite, not gemini-3.8-flash"
+      ],
+      "model_served": "gemini-3.1-flash-lite"
+    },
+    "strategy": {
+      "strategy_id": "fb8cd532-1874-4ed8-8204-5856f0e79fcc",
+      "pillars": [
+        "Restorative Dentistry Solutions",
+        "Accessible General Dental Care"
+      ],
+      "calendar": [
+        {
+          "week": 1,
+          "content_type": "blog_post",
+          "working_title": "Understanding Your Restorative Options: Dentures vs. Dental Implants",
+          "target_keyword": "dentures vs dental implants"
+        },
+        {
+          "week": 2,
+          "content_type": "landing_page",
+          "working_title": "Custom Denture Solutions Designed for Daily Comfort",
+          "target_keyword": "affordable custom dentures"
+        },
+        {
+          "week": 3,
+          "content_type": "social_post",
+          "working_title": "Prioritizing Preventative Checkups for Long-Term Oral Health",
+          "target_keyword": "routine dental exam"
+        },
+        {
+          "week": 4,
+          "content_type": "blog_post",
+          "working_title": "What to Expect During a Dental Implant Consultation",
+          "target_keyword": "dental implant consultation"
+        },
+        {
+          "week": 5,
+          "content_type": "email",
+          "working_title": "Your Guide to Routine Care: Keeping Your Smile Healthy",
+          "target_keyword": "preventative dental care"
+        },
+        {
+          "week": 6,
+          "content_type": "blog_post",
+          "working_title": "Adapting to New Dentures: Everyday Tips for Fit and Comfort",
+          "target_keyword": "denture care and comfort"
+        },
+        {
+          "week": 7,
+          "content_type": "social_post",
+          "working_title": "Convenient Oral Health Care Close to Home",
+          "target_keyword": "local dental care"
+        },
+        {
+          "week": 8,
+          "content_type": "blog_post",
+          "working_title": "Comprehensive Dental Care: From Routine Cleanings to Tooth Replacement",
+          "target_keyword": "comprehensive dental services"
+        }
+      ],
+      "review_flags": [
+        "item 2: ABSOLUTE_CLAIM: 'guarantees'"
+      ],
+      "assumptions_to_confirm": [
+        "Emergency dental care was mentioned in the brief objectives but is not listed among confirmed products or audiences in the brand profile; should emergency dental services be formally added to the brand profile before developing content for it?",
+        "Does the brand want an equal publication cadence between restorative dentistry (dentures/implants) and general preventative dentistry over the 8-week horizon?",
+        "Are all local offices equipped to handle both implant surgery and denture fabrication, or do specific office capabilities dictate regional content distribution?",
+        "Should state-specific dental board disclaimers or advertising notices be included in the footer of every published asset?"
+      ]
+    },
+    "draft": {
+      "draft_id": "33ede76a-9b12-4a25-81b2-15c04f6a5ba0",
+      "title": "Dentures vs Dental Implants: Finding Your Best Restorative Path",
+      "words": 716,
+      "seo_aeo_geo_score": 97,
+      "threshold": 70,
+      "checks_passed": 21,
+      "checks_total": 22,
+      "checks": [
+        {
+          "pillar": "SEO",
+          "name": "title_tag_length",
+          "passed": true,
+          "detail": "51 chars (want 30-60)"
+        },
+        {
+          "pillar": "SEO",
+          "name": "meta_description_length",
+          "passed": true,
+          "detail": "150 chars (want 70-155)"
+        },
+        {
+          "pillar": "SEO",
+          "name": "primary_keyword_present",
+          "passed": true,
+          "detail": "dentures vs dental implants"
+        },
+        {
+          "pillar": "SEO",
+          "name": "keyword_in_title_tag",
+          "passed": true,
+          "detail": "'dentures vs dental implants' in title tag"
+        },
+        {
+          "pillar": "SEO",
+          "name": "keyword_in_headline",
+          "passed": true,
+          "detail": "'dentures vs dental implants' in headline"
+        },
+        {
+          "pillar": "SEO",
+          "name": "keyword_in_first_100_words",
+          "passed": true,
+          "detail": "'dentures vs dental implants' in opening"
+        },
+        {
+          "pillar": "SEO",
+          "name": "slug_format",
+          "passed": true,
+          "detail": "'dentures-vs-dental-implants-guide' (lowercase-hyphenated, <=75 chars, contains keyword)"
+        },
+        {
+          "pillar": "SEO",
+          "name": "h2_structure",
+          "passed": true,
+          "detail": "5 H2 headings (want >=2)"
+        },
+        {
+          "pillar": "SEO",
+          "name": "heading_hierarchy",
+          "passed": true,
+          "detail": "no skipped heading levels"
+        },
+        {
+          "pillar": "SEO",
+          "name": "single_h1",
+          "passed": true,
+          "detail": "0 H1 in body (title is the H1)"
+        },
+        {
+          "pillar": "SEO",
+          "name": "word_count",
+          "passed": true,
+          "detail": "707 words (want 600-2200 for blog_post)"
+        },
+        {
+          "pillar": "SEO",
+          "name": "image_alt_text",
+          "passed": true,
+          "detail": "0 images without alt"
+        },
+        {
+          "pillar": "SEO",
+          "name": "readability_sentence_length",
+          "passed": true,
+          "detail": "avg 16.4 words/sentence (want <=22)"
+        },
+        {
+          "pillar": "SEO",
+          "name": "secondary_keywords_used",
+          "passed": true,
+          "detail": "4 secondary keywords, all used in body"
+        },
+        {
+          "pillar": "AEO",
+          "name": "direct_answer_length",
+          "passed": true,
+          "detail": "53 words (want 30-70)"
+        },
+        {
+          "pillar": "AEO",
+          "name": "answer_up_front",
+          "passed": true,
+          "detail": "opening paragraph restates the direct answer"
+        },
+        {
+          "pillar": "AEO",
+          "name": "faq_quality",
+          "passed": true,
+          "detail": "3/3 well-formed Q&A (want >=3)"
+        },
+        {
+          "pillar": "AEO",
+          "name": "key_takeaways",
+          "passed": true,
+          "detail": "4 takeaways (want 3-6)"
+        },
+        {
+          "pillar": "GEO",
+          "name": "sourced_quotable_facts",
+          "passed": true,
+          "detail": "2/2 facts carry a source (want >=2, all sourced)"
+        },
+        {
+          "pillar": "GEO",
+          "name": "brand_entity_consistency",
+          "passed": true,
+          "detail": "brand entity 'Aspen Dental' named in body and direct answer"
+        },
+        {
+          "pillar": "GEO",
+          "name": "entities_named_in_body",
+          "passed": false,
+          "detail": "4 entities, all present in body"
+        },
+        {
+          "pillar": "GEO",
+          "name": "schema_org_jsonld",
+          "passed": true,
+          "detail": "valid JSON-LD with ['Article', 'FAQPage']"
+        }
+      ],
+      "seo": {
+        "title_tag": "Dentures vs Dental Implants: Options | Aspen Dental",
+        "meta_description": "Comparing dentures vs dental implants? Discover restorative dentistry solutions, costs, and comfort at Aspen Dental. Schedule your consultation today.",
+        "slug": "dentures-vs-dental-implants-guide",
+        "primary_keyword": "dentures vs dental implants",
+        "secondary_keywords": [
+          "restorative dentistry",
+          "custom-fitted dentures",
+          "surgical dental implants",
+          "tooth replacement options"
+        ]
+      },
+      "direct_answer": "When comparing dentures vs dental implants, custom-fitted dentures offer removable, non-surgical tooth replacement, while surgical dental implants provide permanent, anchored support. Aspen Dental provides both restorative dentistry solutions across its network of local offices, helping adults find affordable dental care and personalized treatment plans tailored to their comfort, lifestyle, and oral health needs.",
+      "faq_count": 3,
+      "quotable_facts": [
+        {
+          "fact": "Aspen Dental is a national network of dental practices providing comprehensive oral health services, including general dentistry, dentures, and implants.",
+          "source": "https://www.aspendental.com/"
+        },
+        {
+          "fact": "Custom-fitted dentures provide non-surgical tooth replacement, whereas dental implants require surgical placement into the jawbone.",
+          "source": "https://www.aspendental.com/"
+        }
+      ],
+      "claims_to_verify": [
+        "Custom-fitted dentures offer removable, non-surgical tooth replacement.",
+        "Dental implants require a surgical procedure and fuse with surrounding bone tissue over several months.",
+        "Dentures typically feature lower upfront costs compared to surgical dental implants.",
+        "Aspen Dental provides both dentures and dental implants across its local offices.",
+        "Aspen Dental offers flexible payment options and affordable dental care."
+      ],
+      "review_flags": [
+        "GEO:entities_named_in_body: 4 entities, all present in body"
+      ],
+      "lineage": {
+        "prompt_version": "1.2.0",
+        "model_served": "gemini-3.8-flash",
+        "strategy_id": "fb8cd532-1874-4ed8-8204-5856f0e79fcc"
+      }
+    },
+    "publish": {
+      "status": "published",
+      "published_url": "https://gangadeviai.wordpress.com/2026/10/13/dentures-vs-dental-implants-guide/",
+      "remote_post_id": "10",
+      "read_back_verified": true,
+      "publish_flags": []
+    }
+  },
+  "environment": {
+    "status": "ok",
+    "audit_records_verified": 28,
+    "prompt_version": "1.2.0",
+    "provider": "gemini",
+    "model": "gemini-3.8-flash",
+    "data_retention_class": "FREE_TIER_NOT_ZDR_MAY_BE_USED_FOR_TRAINING",
+    "env": "dev"
+  },
+  "governance": {
+    "integrity": {
+      "status": "verified",
+      "records_checked": 35,
+      "checked_at": "2026-10-13T14:10:55.678851+00:00"
+    },
+    "publication_evidence": {
+      "draft_id": "33ede76a-9b12-4a25-81b2-15c04f6a5ba0",
+      "title": "Dentures vs Dental Implants: Finding Your Best Restorative Path",
+      "state": "published_verified",
+      "approved_by": "sam",
+      "approved_at": "2026-10-13T14:10:49.293550+00:00",
+      "approval_audit_hash": "e672e65b70329ec94f9155bdbcd9f33ad0e56f83b047adc1ff2c93823cf78ca7",
+      "publish_attempts": 1,
+      "published_at": "2026-10-13T14:10:55.429460+00:00",
+      "published_url": "https://gangadeviai.wordpress.com/2026/10/13/dentures-vs-dental-implants-guide/",
+      "remote_post_id": "10",
+      "approved_body_sha256": "f5995abeef9f80d25bd77b3050419cadbce52c6f13bd4235825e37ad403a11a0",
+      "published_html_sha256": "78252c5211ed7dbeaeef7df6a6f1d46ffeec758dcbecca72fbc39d319ed7bb1c",
+      "verified": true,
+      "verification_note": "live content matches approved content",
+      "republished": false,
+      "publish_audit_hashes": [
+        "de19a36533608dabc4830c5303add0a35508bcdf2c110664f43134983f66e432"
+      ]
+    },
+    "audit_lineage_for_article": [
+      {
+        "ts": "2026-10-13T14:10:49.056505+00:00",
+        "event": "GENERATION",
+        "actor": "maya",
+        "hash": "b0b99795d60f6d72"
+      },
+      {
+        "ts": "2026-10-13T14:10:49.293550+00:00",
+        "event": "REVIEW",
+        "actor": "sam",
+        "hash": "e672e65b70329ec9"
+      },
+      {
+        "ts": "2026-10-13T14:10:55.429460+00:00",
+        "event": "PUBLISH",
+        "actor": "sam",
+        "hash": "de19a36533608dab"
+      }
+    ]
+  },
+  "finished_at": "2026-10-13T14:10:56.119120+00:00"
+}

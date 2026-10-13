@@ -1,0 +1,236 @@
+# Structured source for the control mapping shown in the Governance workspace.
+# SOC2_CONTROL_MATRIX.md is the narrative/auditor view; this file is what the application reads.
+# A test asserts that every id here appears in the matrix and vice versa.
+#
+# status:  implemented | partial | planned | unverified
+#   implemented - control exists in code/config AND an automated test or CI step exercises it
+#   partial     - control exists but a documented part is missing or environment-dependent
+#   planned     - documented, not yet built
+#   unverified  - exists but nothing currently exercises it
+# evidence: where an auditor finds proof it operated (tests, audit event types, CI steps, files)
+disclaimer: >
+  Statuses describe implementation and automated verification inside this repository. They are
+  not an assertion of operating effectiveness over a period and do not constitute a SOC 2 report.
+
+controls:
+  - id: C-01
+    title: Single model gateway; no direct provider calls from UI or CMS
+    criteria: [CC6.6, CC6.7]
+    status: implemented
+    evidence: [app/llm.py is the only provider import, infra/network/egress_allowlist.md]
+  - id: C-02
+    title: PII, secrets and tenant-confidential terms redacted before leaving the boundary
+    criteria: [C1.1, C1.2, P3.1, P6.1]
+    status: implemented
+    evidence: [tests/test_redaction.py, test_pii_never_reaches_the_model, audit GENERATION.redaction.counts]
+  - id: C-03
+    title: Model provider under zero-data-retention terms; non-ZDR providers refused in prod
+    criteria: [CC9.2, C1.1]
+    status: partial
+    evidence: [Settings.validate_for_environment, test_free_tier_provider_is_refused_in_prod, audit CONFIG.data_retention_class]
+    gap: Learning deployment runs a free-tier provider without ZDR terms (accepted for public, non-client content only).
+    owner: platform-security
+  - id: C-04
+    title: Knowledge base accessed via SELECT-only role in read-only transactions
+    criteria: [CC6.1, CC6.3]
+    status: unverified
+    evidence: [app/rag.py PgVectorRetriever._assert_read_only, infra/iam/rag_readonly_role.sql]
+    gap: Startup check exists but current deployments use the in-memory retriever; not exercised against Postgres.
+    owner: platform-infra
+  - id: C-05
+    title: Tenant isolation for retrieval, reads and lists
+    criteria: [CC6.1, C1.1]
+    status: implemented
+    evidence: [test_tenant_isolation_in_rag_and_reads, workflow.load_owned]
+  - id: C-06
+    title: Prompts versioned in Git with SHA-256 manifest; runtime refuses mismatches
+    criteria: [CC8.1]
+    status: implemented
+    evidence: [tests/test_prompt_registry.py, CI manifest check, .github/CODEOWNERS]
+  - id: C-07
+    title: Model pinned in config; served model recorded per request
+    criteria: [CC8.1, PI1.2]
+    status: implemented
+    evidence: [audit GENERATION.model_requested/model_served, compliance/MODEL_REGISTRY.md]
+  - id: C-08
+    title: Prompt-injection controls on retrieved content with regression test set
+    criteria: [CC7.1, PI1.2]
+    status: implemented
+    evidence: [tests/test_injection.py, prompts/*/injection_guard.md]
+  - id: C-09
+    title: Human review gate with segregation of duties and verification note before publish
+    criteria: [PI1.4, PI1.5, CC6.3]
+    status: implemented
+    evidence: [test_agent_cannot_publish_without_human_approval, audit REVIEW/PUBLISH]
+  - id: C-10
+    title: Output screening for risky claims, unsourced statistics, hallucinated URLs
+    criteria: [PI1.2, PI1.3]
+    status: implemented
+    evidence: [app/injection.py screen_output, draft.review_flags]
+  - id: C-11
+    title: Hash-chained audit records streamed to write-once storage
+    criteria: [CC7.2, CC7.3, CC4.1]
+    status: partial
+    evidence: [app/audit.py, test_audit_chain_records_full_lineage_and_is_tamper_evident, infra/iam/audit_bucket.tf]
+    gap: Object Lock bucket is defined in Terraform but not provisioned for this deployment; the local mirror is the only copy.
+    owner: platform-infra
+  - id: C-12
+    title: Audit log holds hashes of redacted inputs, never raw personal data
+    criteria: [C1.1, P3.2]
+    status: implemented
+    evidence: [test_audit_chain_records_full_lineage_and_is_tamper_evident asserts no PII]
+  - id: C-13
+    title: IdP-issued identity, role-based access, denied attempts audited
+    criteria: [CC6.1, CC6.2]
+    status: partial
+    evidence: [app/auth.py, test_access_denied_is_audited, audit ACCESS_DENIED/AUTH_FAILED]
+    gap: Local development verifies HS256 tokens from /dev/token; production JWKS/RS256 verification not yet wired.
+    owner: platform-security
+  - id: C-14
+    title: AI inventory with owners; egress denials reconciled to it
+    criteria: [CC3.2, CC6.1]
+    status: implemented
+    evidence: [compliance/AI_INVENTORY.yaml, infra/network/egress_allowlist.md]
+  - id: C-15
+    title: AI-specific risks in the risk register with owners and treatments
+    criteria: [CC3.1, CC3.2, CC3.4]
+    status: implemented
+    evidence: [compliance/AI_RISK_REGISTER.md]
+  - id: C-16
+    title: Output-quality monitoring with thresholds
+    criteria: [CC7.1, CC4.1]
+    status: implemented
+    evidence: [GET /admin/metrics, compliance/MONITORING.md]
+  - id: C-17
+    title: AI incident playbook exercised annually
+    criteria: [CC7.3, CC7.4, CC7.5]
+    status: planned
+    evidence: [compliance/INCIDENT_PLAYBOOK_AI.md]
+    gap: Playbook written; no tabletop exercise recorded yet.
+    owner: GRC
+  - id: C-18
+    title: Acceptable AI use policy and disclosure line on published content
+    criteria: [CC1.1, CC1.4, CC2.2]
+    status: partial
+    evidence: [compliance/policies/ACCEPTABLE_AI_USE.md, cms.render_html disclosure]
+    gap: Policy drafted; no acknowledgement records yet.
+    owner: GRC
+  - id: C-19
+    title: Draft retention and audited deletion
+    criteria: [P4.2, P4.3, CC6.5]
+    status: partial
+    evidence: [workflow.delete_draft, audit DELETE]
+    gap: Scheduled purge of drafts older than the retention period is not implemented.
+    owner: platform-leads
+  - id: C-20
+    title: CI gates - tests, lint, manifest check, dependency and secret scanning
+    criteria: [CC8.1, CC7.1]
+    status: implemented
+    evidence: [.github/workflows/ci.yml, CI run history]
+  - id: C-21
+    title: Model refusals recorded with category; fallback model recorded and flagged
+    criteria: [PI1.2, CC7.2]
+    status: implemented
+    evidence: [audit GENERATION.refusal_category, MODEL_FALLBACK flag]
+  - id: C-22
+    title: Crawl scope fixed per tenant in Git; API cannot supply a URL
+    criteria: [CC6.6, CC6.7, CC8.1]
+    status: implemented
+    evidence: [test_crawl_stays_in_scope_and_honours_robots, tenants/brands.yaml]
+  - id: C-23
+    title: SSRF guard on crawl targets and redirects
+    criteria: [CC6.6]
+    status: implemented
+    evidence: [test_ssrf_guard_rejects_private_targets, audit CRAWL_POLICY_REFUSED]
+  - id: C-24
+    title: robots.txt honoured, identifying User-Agent, byte caps
+    criteria: [CC6.7, CC9.2]
+    status: implemented
+    evidence: [app/brand.py crawl, audit BRAND_ANALYSIS.crawl_notes]
+  - id: C-25
+    title: Crawled pages treated as untrusted - redacted, screened, delimited
+    criteria: [C1.1, CC7.1]
+    status: implemented
+    evidence: [test_brand_analysis_drops_injected_pages_and_needs_confirmation]
+  - id: C-26
+    title: Brand profile requires confirmation by a reviewer other than the requester
+    criteria: [PI1.2, PI1.4]
+    status: implemented
+    evidence: [test_brand_confirmation_gate_and_supersession, audit BRAND_REVIEW]
+  - id: C-27
+    title: Model separates site evidence from inference in the brand profile
+    criteria: [PI1.2]
+    status: implemented
+    evidence: [BRAND_SCHEMA observations_to_confirm, prompts/*/brand_analysis.md]
+  - id: C-28
+    title: Strategy only from a confirmed profile; lineage records profile version
+    criteria: [PI1.2, CC7.2]
+    status: implemented
+    evidence: [test_strategy_requires_confirmed_brand, audit STRATEGY_GENERATED]
+  - id: C-29
+    title: Strategy items validated and screened for unsubstantiated claims
+    criteria: [PI1.2, PI1.3]
+    status: implemented
+    evidence: [test_strategy_generation_screens_items_and_links_brand]
+  - id: C-30
+    title: Strategy approval with segregation of duties; drafts only from approved items
+    criteria: [PI1.4, CC6.3]
+    status: implemented
+    evidence: [test_strategy_approval_sod_and_draft_from_item, audit STRATEGY_REVIEW]
+  - id: C-31
+    title: Per-tenant publishing credential read only on the publish path; fails closed
+    criteria: [CC6.1, CC6.3]
+    status: implemented
+    evidence: [test_credentials_are_per_tenant_and_fail_closed]
+  - id: C-32
+    title: Publish target host pinned to the configured domain over HTTPS
+    criteria: [C1.1, CC6.7]
+    status: implemented
+    evidence: [test_publish_target_must_be_inside_brand_domain, test_publish_domain_is_git_pinned_not_request_controlled]
+  - id: C-33
+    title: Post-publish read-back verification with hash comparison
+    criteria: [PI1.4, PI1.5, CC7.1]
+    status: implemented
+    evidence: [test_verification_detects_tampered_live_content, audit PUBLISH.verified]
+  - id: C-34
+    title: AI-assistance disclosure appended to every published post
+    criteria: [CC2.3]
+    status: implemented
+    evidence: [cms.render_html]
+  - id: C-35
+    title: Deterministic SEO/AEO/GEO validation with threshold; model does not self-certify
+    criteria: [PI1.2, PI1.3, CC4.1]
+    status: implemented
+    evidence: [tests/test_seo.py, audit GENERATION.seo_score]
+  - id: C-36
+    title: Unsourced citable facts flagged; JSON-LD re-serialised before embedding
+    criteria: [PI1.2, CC6.8]
+    status: implemented
+    evidence: [test_jsonld_is_resanitised_before_embedding, GEO:unsourced_fact flag]
+  - id: C-37
+    title: SEO elements published through supported channels; in-place re-publication after failed verification
+    criteria: [PI1.5, CC8.1]
+    status: implemented
+    evidence: [test_seo_elements_travel_with_the_post, test_wordpress_com_omits_inline_jsonld_and_republish_updates_in_place, field note 2026-10-12]
+
+gaps:
+  - id: G-01
+    title: Envelope-encrypt redaction mappings with KMS at rest
+    related: [C-02, C-12]
+    owner: platform-infra
+    target: before production
+  - id: G-02
+    title: JWKS/RS256 token verification against the IdP
+    related: [C-13]
+    owner: platform-security
+    target: before production
+  - id: G-03
+    title: Scheduled purge of drafts past the retention period
+    related: [C-19]
+    owner: platform-leads
+    target: before production
+  - id: G-04
+    title: Embedding provider under ZDR, added to the AI inventory
+    related: [C-03, C-14]
+    owner: platform-security
+    target: before production

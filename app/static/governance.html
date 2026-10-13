@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Governance Workspace</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --ink:#1c2430; --muted:#5b6675; --line:#e3e7ec; --ok:#1b7f3b; --warn:#b26a00; --bad:#b3261e; --grey:#6b7280; --accent:#2f5fd0; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 system-ui, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--ink); }
+  header { background:#111827; color:#fff; padding:0 20px; display:flex; align-items:center; gap:22px; height:52px; }
+  header .brand { font-weight:600; }
+  header nav a { color:#cbd5e1; text-decoration:none; padding:16px 4px; display:inline-block; border-bottom:2px solid transparent; }
+  header nav a.active { color:#fff; border-color:#60a5fa; }
+  header .persona { margin-left:auto; display:flex; gap:6px; align-items:center; font-size:12px; }
+  header .persona select, header .persona input { font:inherit; padding:4px 6px; border-radius:5px; border:0; }
+  .banner { padding:8px 20px; font-size:12.5px; }
+  .banner.sim { background:#fff3e0; color:#7a4a00; border-bottom:1px solid #f1d6a8; }
+  .banner.dev { background:#e8eefc; color:#1e3a8a; border-bottom:1px solid #c7d4f5; }
+  .layout { display:grid; grid-template-columns:220px minmax(0,1fr); min-height:calc(100vh - 52px); }
+  aside { background:#fff; border-right:1px solid var(--line); padding:14px 0; }
+  aside a { display:block; padding:9px 18px; color:var(--ink); text-decoration:none; font-size:13.5px; }
+  aside a.active { background:#eef2ff; color:var(--accent); font-weight:600; border-right:3px solid var(--accent); }
+  main { padding:18px 22px; }
+  @media (max-width: 900px) { .layout { grid-template-columns:1fr; } aside { display:flex; overflow:auto; border-right:0; border-bottom:1px solid var(--line); } }
+  h1 { font-size:18px; margin:0 0 4px; } .sub { color:var(--muted); font-size:12.5px; margin-bottom:14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:14px; }
+  .tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
+  .tile .v { font-size:26px; font-weight:700; } .tile .l { color:var(--muted); font-size:12.5px; } .tile .s { color:var(--muted); font-size:11px; margin-top:4px; }
+  table { width:100%; border-collapse:collapse; font-size:12.8px; } th, td { text-align:left; padding:7px 8px; border-bottom:1px solid var(--line); vertical-align:top; } th { color:var(--muted); font-weight:600; font-size:12px; }
+  .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:11.5px; background:#eef1f5; color:var(--grey); white-space:nowrap; }
+  .pill.ok { background:#e3f4e8; color:var(--ok); } .pill.warn { background:#fff3e0; color:var(--warn); } .pill.bad { background:#fdecea; color:var(--bad); } .pill.grey { background:#eef1f5; color:var(--grey); }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:6px 0 10px; }
+  input, select { border:1px solid var(--line); border-radius:6px; padding:6px 8px; font:inherit; }
+  button.act { background:var(--accent); color:#fff; border:0; padding:7px 12px; border-radius:6px; cursor:pointer; } button.act.secondary { background:#e8eefc; color:var(--accent); }
+  pre { background:#0f172a; color:#e5e7eb; padding:10px; border-radius:8px; font-size:11.5px; overflow:auto; max-height:360px; }
+  .empty { color:var(--muted); padding:18px; text-align:center; } .muted { color:var(--muted); } .mono { font-family:ui-monospace, Consolas, monospace; font-size:11.5px; }
+  .note { font-size:12.5px; color:var(--muted); border-left:3px solid var(--line); padding:6px 10px; margin:8px 0; }
+  .pager { display:flex; gap:8px; align-items:center; justify-content:flex-end; font-size:12.5px; margin-top:8px; }
+  .err { color:var(--bad); font-size:12.5px; }
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">Content Agent</span>
+  <nav>
+    <a id="navContent" href="/demo">Content Workspace</a>
+    <a class="active" href="/governance">Governance Workspace</a>
+  </nav>
+  <div class="persona">
+    <label>Tenant <input id="tenant" style="width:110px"></label>
+    <label>Acting as
+      <select id="persona">
+        <option value="reviewer">Reviewer</option>
+        <option value="admin">Administrator</option>
+        <option value="requester">Requester</option>
+      </select>
+    </label>
+    <button class="act secondary" id="apply">Apply</button>
+  </div>
+</header>
+<div id="banner" class="banner" style="display:none"></div>
+
+<div class="layout">
+  <aside>
+    <a href="#overview">Governance Overview</a>
+    <a href="#approvals">Approval History</a>
+    <a href="#audit">Audit Trail</a>
+    <a href="#integrity">Integrity Verification</a>
+    <a href="#security">Security Events</a>
+    <a href="#evidence">Publication Evidence</a>
+    <a href="#controls">Control Mapping</a>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const q = new URLSearchParams(location.search);
+let TENANT = q.get("tenant") || localStorage.getItem("lastTenant") || "client-a";
+let PERSONA = localStorage.getItem("govPersona") || "reviewer";
+let ENV = {};
+const PERSONAS = { requester:{sub:"maya",roles:"requester"}, reviewer:{sub:"sam",roles:"reviewer"}, admin:{sub:"ops",roles:"admin"} };
+const tokens = {};
+
+async function token() {
+  const k = PERSONA + ":" + TENANT;
+  if (tokens[k]) return tokens[k];
+  const p = PERSONAS[PERSONA];
+  const r = await fetch(`/dev/token?sub=${p.sub}&tenant_id=${TENANT}&roles=${p.roles}`, {method:"POST"});
+  if (!r.ok) throw new Error("Token service unavailable in this environment - supply an IdP token.");
+  tokens[k] = (await r.json()).token; return tokens[k];
+}
+async function api(path, opts={}) {
+  const r = await fetch(path, {...opts, headers:{"Authorization":"Bearer "+await token(), "content-type":"application/json", ...(opts.headers||{})}});
+  let data = null; try { data = await r.json(); } catch {}
+  if (!r.ok) throw Object.assign(new Error(data?.detail || r.statusText), {status:r.status});
+  return data;
+}
+const pill = (text, cls) => `<span class="pill ${cls}">${esc(text)}</span>`;
+const ts = s => s ? esc(String(s).replace("T"," ").slice(0,19)) : "—";
+const short = h => h ? `<span class="mono" title="${esc(h)}">${esc(String(h).slice(0,12))}…</span>` : "—";
+function denied(e, what) {
+  if (e.status === 403) return `<div class="card"><div class="empty">The ${esc(PERSONA)} role cannot view ${what}. Switch to an authorised role (access attempts are recorded).</div></div>`;
+  return `<div class="card"><div class="err">${esc(e.message)}</div></div>`;
+}
+function pager(p, render) {
+  if (!p || p.total <= p.page_size) return "";
+  const last = Math.ceil(p.total / p.page_size);
+  return `<div class="pager"><span class="muted">${p.total} records</span><button class="act secondary" ${p.page<=1?"disabled":""} onclick="${render}(${p.page-1})">Prev</button><span>${p.page}/${last}</span><button class="act secondary" ${p.page>=last?"disabled":""} onclick="${render}(${p.page+1})">Next</button></div>`;
+}
+
+// ---------------- views
+async function overview() {
+  try {
+    const o = await api("/governance/overview");
+    const m = o.metrics, i = o.integrity;
+    const icls = {verified:"ok", failed:"bad", unavailable:"warn", not_yet_performed:"grey"}[i.status];
+    $("#main").innerHTML = `<h1>Governance Overview</h1><div class="sub">Tenant ${esc(o.tenant_id)} · every figure is computed from audit records or workflow rows; the source is shown under each.</div>
+      <div class="tiles">
+        ${Object.entries(m).map(([k,v]) => `<div class="card tile"><div class="v">${v.value}</div><div class="l">${esc(k.replace(/_/g," "))}</div><div class="s">source: ${esc(v.source)}</div></div>`).join("")}
+        <div class="card tile"><div class="v">${pill(i.status.replace(/_/g," "), icls)}</div><div class="l">audit-chain integrity</div><div class="s">${i.checked_at ? "checked "+ts(i.checked_at)+" · "+i.records_checked+" records" : "verification has not been run in this process yet"}</div></div>
+      </div>
+      <div class="note">This workspace shows operational evidence maintained by the application. It is not a compliance score and does not assert that any control operated effectively over a period.</div>`;
+  } catch (e) { $("#main").innerHTML = denied(e, "the governance overview"); }
+}
+
+async function approvals(page=1) {
+  const f = window._apf || {};
+  try {
+    const p = await api(`/governance/approvals?page=${page}&page_size=25&stage=${f.stage||""}&decision=${f.decision||""}&reviewer_id=${f.reviewer||""}`);
+    $("#main").innerHTML = `<h1>Approval History</h1><div class="sub">Every human decision at every gate, with the requester shown beside the reviewer so separation of duties is visible.</div>
+      <div class="card"><div class="row">
+        <select id="f-stage"><option value="">all stages</option><option>brand_profile</option><option>strategy</option><option>draft</option></select>
+        <select id="f-decision"><option value="">all decisions</option><option>confirm</option><option>approve</option><option>request_changes</option><option>reject</option></select>
+        <input id="f-reviewer" placeholder="reviewer id" style="width:140px">
+        <button class="act secondary" onclick="window._apf={stage:$('#f-stage').value,decision:$('#f-decision').value,reviewer:$('#f-reviewer').value};approvals(1)">Filter</button></div>
+      ${p.items.length ? `<table><tr><th>When</th><th>Stage</th><th>Item</th><th>Requester</th><th>Reviewer</th><th>Decision</th><th>Note</th><th>SoD</th><th>Audit</th></tr>
+        ${p.items.map(r => `<tr><td>${ts(r.ts)}</td><td>${esc(r.stage)}</td><td title="${esc(r.object_id)}">${esc(r.object_title||r.object_id.slice(0,8))}</td><td>${esc(r.requester_id)}</td><td>${esc(r.reviewer_id)}</td>
+          <td>${pill(r.decision, r.decision==="approve"||r.decision==="confirm"?"ok":r.decision==="reject"?"bad":"warn")}</td><td>${esc(r.note)}</td>
+          <td>${r.separation_of_duties ? pill("requester ≠ reviewer","ok") : pill("same identity","bad")}</td><td>${short(r.audit_hash)}</td></tr>`).join("")}</table>` : `<div class="empty">No approval decisions recorded for this tenant yet.</div>`}
+      ${pager(p,"approvals")}</div>`;
+    if (f.stage) $("#f-stage").value = f.stage; if (f.decision) $("#f-decision").value = f.decision; if (f.reviewer) $("#f-reviewer").value = f.reviewer;
+  } catch (e) { $("#main").innerHTML = denied(e, "approval history"); }
+}
+
+async function audit(page=1) {
+  const f = window._auf || {};
+  try {
+    const p = await api(`/governance/audit?page=${page}&page_size=30&event_type=${f.type||""}&object_id=${f.obj||""}&actor=${f.actor||""}`);
+    $("#main").innerHTML = `<h1>Audit Trail</h1><div class="sub">Hash-chained records, newest first. Details contain identifiers and hashes only — never briefs, page text or redaction mappings.</div>
+      <div class="card"><div class="row">
+        <input id="a-type" placeholder="event type (e.g. PUBLISH)" style="width:200px"><input id="a-obj" placeholder="object id" style="width:260px"><input id="a-actor" placeholder="actor" style="width:120px">
+        <button class="act secondary" onclick="window._auf={type:$('#a-type').value,obj:$('#a-obj').value,actor:$('#a-actor').value};audit(1)">Filter</button></div>
+      ${p.items.length ? `<table><tr><th>When</th><th>Event</th><th>Actor</th><th>Tenant</th><th>Object</th><th>Hash</th><th>Prev</th><th></th></tr>
+        ${p.items.map(r => `<tr><td>${ts(r.ts)}</td><td><b>${esc(r.event_type)}</b></td><td>${esc(r.actor_id)}</td><td>${esc(r.tenant_id)}</td><td class="mono">${esc((r.object_id||"").slice(0,8))}</td><td>${short(r.record_hash)}</td><td>${short(r.prev_hash)}</td>
+          <td><button class="act secondary" onclick="detail('${esc(r.record_hash)}')">detail</button></td></tr>`).join("")}</table>` : `<div class="empty">No audit records visible.</div>`}
+      ${pager(p,"audit")}</div><div id="detail"></div>`;
+    if (f.type) $("#a-type").value=f.type; if (f.obj) $("#a-obj").value=f.obj; if (f.actor) $("#a-actor").value=f.actor;
+  } catch (e) { $("#main").innerHTML = denied(e, "the audit trail"); }
+}
+async function detail(h) {
+  try { const r = await api(`/governance/audit/${h}`); $("#detail").innerHTML = `<div class="card"><h2 style="font-size:14px;margin:0 0 6px">Record ${esc(h.slice(0,16))}…</h2><pre>${esc(JSON.stringify(r,null,1))}</pre></div>`; $("#detail").scrollIntoView({behavior:"smooth"}); }
+  catch (e) { $("#detail").innerHTML = denied(e, "this record"); }
+}
+
+async function integrity() {
+  const render = (i) => {
+    const cls = {verified:"ok", failed:"bad", unavailable:"warn", not_yet_performed:"grey"}[i.status];
+    const text = {verified:"Verified — every record re-hashes to its stored value and links to its predecessor.",
+                  failed:`Verification failed — record index ${i.first_bad_index} does not match. Treat the mirror as suspect and compare with the write-once copy.`,
+                  unavailable:`Verification could not run: ${i.error}`,
+                  not_yet_performed:"Verification has not been run in this process yet. Run it to obtain a result."}[i.status];
+    $("#main").innerHTML = `<h1>Integrity Verification</h1><div class="sub">Explicit re-computation of the audit hash chain. A result is shown only after the check actually ran.</div>
+      <div class="card"><div class="row">${pill(i.status.replace(/_/g," "), cls)} <span>${esc(text)}</span></div>
+        <div class="muted">last checked: ${ts(i.checked_at)} · records checked: ${i.records_checked ?? "—"}</div>
+        <div class="row"><button class="act" onclick="verifyNow()">Run verification now</button></div>
+        <div class="note">${esc(i.explanation)}</div></div>`;
+  };
+  try { render(await api("/governance/integrity")); } catch (e) { $("#main").innerHTML = denied(e, "integrity verification"); }
+  window.verifyNow = async () => { try { render(await api("/governance/integrity/verify", {method:"POST"})); } catch (e) { $("#main").innerHTML = denied(e, "integrity verification"); } };
+}
+
+async function security(page=1) {
+  try {
+    const p = await api(`/governance/security-events?page=${page}&page_size=30`);
+    const sev = s => ({high:"bad", medium:"warn", info:"grey"}[s] || "grey");
+    $("#main").innerHTML = `<h1>Security Events</h1><div class="sub">Derived from recorded audit events: refused access and authentication, refused crawl targets, prompt-injection mitigations, redaction, publication-integrity flags and configuration facts. Nothing here is invented to fill the page.</div>
+      <div class="card">${p.items.length ? `<table><tr><th>When</th><th>Category</th><th>Severity</th><th>Outcome</th><th>Explanation</th><th>Actor</th><th>Audit</th></tr>
+        ${p.items.map(e => `<tr><td>${ts(e.ts)}</td><td>${esc(e.category)}</td><td>${pill(e.severity, sev(e.severity))}</td><td>${esc(e.outcome)}</td><td>${esc(e.explanation)}</td><td>${esc(e.actor_id)}</td><td>${short(e.audit_hash)}</td></tr>`).join("")}</table>` : `<div class="empty">No security events recorded for this tenant.</div>`}
+      ${pager(p,"security")}
+      <div class="note">Not instrumented yet: production start-up refusals (they happen before the audit sink exists) and network-level egress denials (those live in the proxy's logs, see infra/network/egress_allowlist.md).</div></div>`;
+  } catch (e) { $("#main").innerHTML = denied(e, "security events"); }
+}
+
+async function evidence() {
+  try {
+    const rows = await api("/governance/evidence");
+    const st = s => ({approved:["approved · not published","warn"], published_verified:["published · verified","ok"], published_unverified:["published · NOT verified","bad"]}[s]);
+    $("#main").innerHTML = `<h1>Publication Evidence</h1><div class="sub">For each approved or published article: who approved, what was sent, what is live, and whether they match. A successful HTTP response is not treated as verification.</div>
+      <div class="card">${rows.length ? `<table><tr><th>Article</th><th>State</th><th>Approved by</th><th>Approved at</th><th>Published at</th><th>Attempts</th><th>Approved hash</th><th>Live hash</th><th>Verification</th><th>URL</th></tr>
+        ${rows.map(r => `<tr><td title="${esc(r.draft_id)}">${esc(r.title)}</td><td>${pill(...st(r.state))}</td><td>${esc(r.approved_by)}</td><td>${ts(r.approved_at)}</td><td>${ts(r.published_at)}</td><td>${r.publish_attempts}${r.republished?" (re-published)":""}</td>
+          <td>${short(r.approved_body_sha256)}</td><td>${short(r.published_html_sha256)}</td><td>${r.verified===true?pill("match","ok"):r.verified===false?pill("mismatch","bad"):pill("—","grey")}<div class="muted">${esc(r.verification_note||"")}</div></td>
+          <td>${r.published_url?`<a href="${esc(r.published_url)}" target="_blank" rel="noopener">open</a>`:"—"}</td></tr>`).join("")}</table>` : `<div class="empty">No approved or published articles for this tenant yet.</div>`}</div>`;
+  } catch (e) { $("#main").innerHTML = denied(e, "publication evidence"); }
+}
+
+async function controls() {
+  try {
+    const c = await api("/governance/controls");
+    const cls = {implemented:"ok", partial:"warn", planned:"grey", unverified:"grey"};
+    $("#main").innerHTML = `<h1>Control Mapping</h1><div class="sub">Source: <code>${esc(c.source)}</code>. Status describes implementation and automated verification in this repository — not operating effectiveness over a period, and not a certification.</div>
+      <div class="tiles">${Object.entries(c.counts).map(([k,v]) => `<div class="card tile"><div class="v">${v}</div><div class="l">${pill(k, cls[k])}</div></div>`).join("")}</div>
+      <div class="card"><table><tr><th>ID</th><th>Control</th><th>Criteria</th><th>Status</th><th>Evidence</th><th>Known gap / owner</th></tr>
+        ${c.controls.map(x => `<tr><td class="mono">${esc(x.id)}</td><td>${esc(x.title)}</td><td class="mono">${esc((x.criteria||[]).join(", "))}</td><td>${pill(x.status, cls[x.status])}</td><td class="muted">${(x.evidence||[]).map(esc).join("<br>")}</td><td>${x.gap?esc(x.gap)+(x.owner?` <span class="muted">(${esc(x.owner)})</span>`:""):"—"}</td></tr>`).join("")}</table></div>
+      <div class="card"><h2 style="font-size:14px;margin:0 0 8px">Open gaps</h2><table><tr><th>ID</th><th>Gap</th><th>Related</th><th>Owner</th><th>Target</th></tr>
+        ${c.gaps.map(g => `<tr><td class="mono">${esc(g.id)}</td><td>${esc(g.title)}</td><td class="mono">${esc((g.related||[]).join(", "))}</td><td>${esc(g.owner)}</td><td>${esc(g.target)}</td></tr>`).join("")}</table></div>`;
+  } catch (e) { $("#main").innerHTML = denied(e, "the control mapping"); }
+}
+
+// ---------------- shell
+const VIEWS = {overview, approvals, audit, integrity, security, evidence, controls};
+function route() {
+  const v = (location.hash || "#overview").slice(1);
+  document.querySelectorAll("aside a").forEach(a => a.classList.toggle("active", a.getAttribute("href") === "#"+v));
+  (VIEWS[v] || overview)();
+}
+async function init() {
+  $("#tenant").value = TENANT; $("#persona").value = PERSONA;
+  $("#navContent").href = `/demo?tenant=${encodeURIComponent(TENANT)}`;
+  $("#apply").onclick = () => { TENANT = $("#tenant").value.trim(); PERSONA = $("#persona").value; localStorage.setItem("lastTenant", TENANT); localStorage.setItem("govPersona", PERSONA); $("#navContent").href = `/demo?tenant=${encodeURIComponent(TENANT)}`; route(); };
+  try { ENV = await fetch("/healthz").then(r => r.json()); } catch {}
+  const b = $("#banner");
+  if (["demo","test"].includes(ENV.env)) { b.className = "banner sim"; b.style.display = "block"; b.textContent = `SIMULATED DATA — environment "${ENV.env}" uses a simulated model, website and CMS. Nothing shown here is production evidence.`; }
+  else if (ENV.env === "dev") { b.className = "banner dev"; b.style.display = "block"; b.textContent = `Development environment · provider ${ENV.provider}/${ENV.model} · data retention class ${ENV.data_retention_class}`; }
+  window.addEventListener("hashchange", route); route();
+}
+init();
+</script>
+</body>
+</html>

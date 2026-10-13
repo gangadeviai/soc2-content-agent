@@ -14,20 +14,28 @@ from contextlib import asynccontextmanager
 
 import yaml
 from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from . import brand as brand_stage
+from . import governance, workflow
 from . import strategy as strategy_stage
-from . import workflow
 from .audit import AuditRecord, AuditSink
-from .auth import ROLE_ADMIN, ROLE_REQUESTER, ROLE_REVIEWER, Principal, mint_dev_token, require_role
+from .auth import (
+    ROLE_ADMIN,
+    ROLE_REQUESTER,
+    ROLE_REVIEWER,
+    Principal,
+    current_principal,
+    mint_dev_token,
+    require_role,
+)
 from .brand import BrandConfig, FakeFetcher, HttpFetcher
 from .cms import FakePublisher, WordPressPublisher, load_wordpress_credentials
 from .config import REPO_ROOT, Settings, get_settings
 from .demo_data import DEMO_SITE
-from .llm import FakeLLMClient, make_llm_client
+from .llm import FakeLLMClient, ProviderUnavailableError, make_llm_client
 from .models import BrandProfile, ContentStrategy, Draft, DraftStatus, StrategyStatus, make_session_factory
 from .prompts import PromptRegistry
 from .rag import Chunk, InMemoryRetriever, PgVectorRetriever
@@ -185,9 +193,22 @@ def create_app(settings: Settings | None = None, **overrides) -> FastAPI:
         app.state.services = build_services(settings, **overrides)
         app.state.audit = app.state.services.audit
         app.state.sessions = make_session_factory(settings.database_url)
+        app.state.verification = governance.VerificationState()  # explicit action, not implied by uptime
+        app.state.controls_path = REPO_ROOT / "compliance" / "controls.yaml"
         yield
 
-    app = FastAPI(title="SOC 2-ready Marketing Content Agent", version="1.1.0", lifespan=lifespan)
+    app = FastAPI(title="SOC 2-ready Marketing Content Agent", version="1.2.0", lifespan=lifespan)
+
+    @app.exception_handler(ProviderUnavailableError)
+    async def provider_unavailable(request: Request, exc: ProviderUnavailableError):
+        # Provider outages are availability events, not application bugs: clean 503, no traceback,
+        # and an audit record so the gap in service is on the record (A1.2 / CC7.2).
+        request.app.state.audit.write(
+            AuditRecord(
+                "MODEL_PROVIDER_UNAVAILABLE", "system", "*", None, {"path": request.url.path, "reason": str(exc)[:200]}
+            )
+        )
+        return JSONResponse(status_code=503, content={"detail": f"model provider unavailable: {exc}"})
 
     @app.middleware("http")
     async def request_context(request: Request, call_next):
@@ -398,6 +419,91 @@ def create_app(settings: Settings | None = None, **overrides) -> FastAPI:
             "seo_below_threshold": sum(1 for d in drafts if d.seo_score is not None and d.seo_score < SCORE_THRESHOLD),
             "model_fallbacks": sum(1 for d in drafts if any(f.startswith("MODEL_FALLBACK") for f in d.review_flags)),
         }
+
+    # ---- governance workspace (read-only evidence views) --------------------------------------
+    # Roles: reviewers see approvals and publication evidence for their tenant; administrators
+    # additionally see the audit trail, security events and system records; any authenticated
+    # user may read the control mapping. All queries are tenant-scoped server-side.
+    def _is_admin(p: Principal) -> bool:
+        return p.has(ROLE_ADMIN)
+
+    @app.get("/governance", include_in_schema=False)
+    def governance_ui():
+        return FileResponse(STATIC_DIR / "governance.html")
+
+    @app.get("/governance/overview")
+    def governance_overview(request: Request, principal: Principal = reviewer, session: Session = Depends(db)):
+        return governance.overview(
+            request.app.state.audit, session, principal.tenant_id, request.app.state.verification, _is_admin(principal)
+        )
+
+    @app.get("/governance/approvals")
+    def governance_approvals(
+        request: Request,
+        stage: str | None = None,
+        decision: str | None = None,
+        reviewer_id: str | None = None,
+        object_id: str | None = None,
+        page: int = 1,
+        page_size: int = 50,
+        principal: Principal = reviewer,
+        session: Session = Depends(db),
+    ):
+        rows = governance.approval_history(
+            request.app.state.audit,
+            session,
+            principal.tenant_id,
+            stage=stage,
+            decision=decision,
+            reviewer=reviewer_id,
+            object_id=object_id,
+        )
+        return governance.paginate(rows, page, page_size)
+
+    @app.get("/governance/audit")
+    def governance_audit(
+        request: Request,
+        event_type: str | None = None,
+        object_id: str | None = None,
+        actor: str | None = None,
+        page: int = 1,
+        page_size: int = 50,
+        principal: Principal = admin,
+    ):
+        rows = governance.audit_records(
+            request.app.state.audit, principal.tenant_id, True, event_type=event_type, object_id=object_id, actor=actor
+        )
+        return governance.paginate(rows, page, page_size)
+
+    @app.get("/governance/audit/{record_hash}")
+    def governance_audit_detail(record_hash: str, request: Request, principal: Principal = admin):
+        rec = governance.record_detail(request.app.state.audit, principal.tenant_id, True, record_hash)
+        if rec is None:
+            raise HTTPException(404, "audit record not found")
+        return rec
+
+    @app.get("/governance/integrity")
+    def governance_integrity(request: Request, principal: Principal = admin):
+        return request.app.state.verification.to_dict()
+
+    @app.post("/governance/integrity/verify")
+    def governance_integrity_verify(request: Request, principal: Principal = admin):
+        return request.app.state.verification.perform(request.app.state.audit).to_dict()
+
+    @app.get("/governance/security-events")
+    def governance_security_events(request: Request, page: int = 1, page_size: int = 50, principal: Principal = admin):
+        return governance.paginate(
+            governance.security_events(request.app.state.audit, principal.tenant_id, True), page, page_size
+        )
+
+    @app.get("/governance/evidence")
+    def governance_evidence(request: Request, principal: Principal = reviewer, session: Session = Depends(db)):
+        return governance.publication_evidence(request.app.state.audit, session, principal.tenant_id)
+
+    @app.get("/governance/controls")
+    def governance_controls(request: Request, principal: Principal = Depends(current_principal)):
+        cs = governance.load_controls(request.app.state.controls_path)
+        return {"counts": cs.counts, "controls": cs.controls, "gaps": cs.gaps, "source": "compliance/controls.yaml"}
 
     if settings.env in {"dev", "test", "demo"}:
 

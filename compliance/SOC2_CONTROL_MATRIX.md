@@ -79,6 +79,10 @@ Processing Integrity, Privacy.** Availability is in scope only for the review po
 
 `BRAND_ANALYSIS` (pages + hashes, prompt version, model) → `BRAND_REVIEW` (who confirmed) → `STRATEGY_GENERATED` (profile version, chunks) → `STRATEGY_REVIEW` → `GENERATION` (strategy id, item, input/output hashes) → `REVIEW` → `PUBLISH` (URL, remote post id, approved vs live hash, verified). All records hash-chained and in S3 Object Lock.
 
+### Machine-readable source
+
+The Governance workspace (`/governance` → Control Mapping) reads `compliance/controls.yaml`, which carries each control's status (`implemented` / `partial` / `planned` / `unverified`), evidence pointers, gap and owner. `tests/test_governance.py` asserts the YAML and this table list the same control IDs.
+
 ## Known gaps (to close before Type II observation period)
 
 | Gap | Owner | Target |

@@ -14,6 +14,8 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+# Local-development HS256 secret (>= 32 bytes per RFC 7518). Prod refuses this value or any short one.
+DEV_JWT_SECRET = "dev-only-change-me-before-any-deployment-0123456789"
 
 
 class Settings(BaseSettings):
@@ -27,6 +29,9 @@ class Settings(BaseSettings):
     # so it fails control C-03 and is refused in prod). Recorded in the CONFIG audit record.
     provider: str = "anthropic"
     gemini_model: str = "gemini-3.8-flash"
+    # Ordered fallbacks tried only after the primary model fails with transient errors. The served
+    # model is always recorded (lineage) and the artefact is flagged MODEL_FALLBACK for the reviewer.
+    gemini_fallback_models: list[str] = ["gemini-3.5-flash", "gemini-3.1-flash-lite"]
     # Read from GEMINI_API_KEY (environment or .env). Never printed: repr=False, excluded from audit.
     gemini_api_key: str = Field(default="", validation_alias="GEMINI_API_KEY", repr=False)
     # Pinned model ID. Changing it is a change-management event (see
@@ -67,7 +72,7 @@ class Settings(BaseSettings):
 
     # --- AuthN / AuthZ (CC6.1, CC6.2) ------------------------------------------
     # HS256 for local dev; production uses the OIDC provider's JWKS (RS256).
-    jwt_secret: str = Field(default="dev-only-change-me", repr=False)
+    jwt_secret: str = Field(default=DEV_JWT_SECRET, repr=False)
     jwt_issuer: str = "https://idp.example.com/"
     jwt_audience: str = "content-agent"
 
@@ -101,7 +106,7 @@ class Settings(BaseSettings):
                 problems.append("AGENT_ZDR_CONTRACT_CONFIRMED must be true in prod")
             if not self.audit_s3_bucket:
                 problems.append("AGENT_AUDIT_S3_BUCKET (Object Lock) is required in prod")
-            if self.jwt_secret == "dev-only-change-me":
+            if self.jwt_secret == DEV_JWT_SECRET or len(self.jwt_secret.encode()) < 32:
                 problems.append("AGENT_JWT_SECRET is the dev default")
             if self.database_url.startswith("sqlite"):
                 problems.append("SQLite is not permitted in prod")

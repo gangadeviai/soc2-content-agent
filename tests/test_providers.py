@@ -58,6 +58,65 @@ def test_gemini_client_parses_structured_response_and_lineage(monkeypatch):
     assert len(seen["body"]["systemInstruction"]["parts"]) == 2  # stage prompt + injection guard
 
 
+def test_gemini_retries_transient_errors_then_gives_up_cleanly(monkeypatch):
+    import time
+
+    from app.llm import ProviderUnavailableError
+
+    monkeypatch.setenv("GEMINI_API_KEY", "k")
+    monkeypatch.setattr(time, "sleep", lambda s: None)  # no real backoff in tests
+    calls = {"n": 0}
+
+    def flaky(req: httpx.Request) -> httpx.Response:
+        calls["n"] += 1
+        if calls["n"] < 3:
+            return httpx.Response(503, json={"error": {"message": "overloaded"}})
+        return httpx.Response(
+            200,
+            json={
+                "candidates": [{"content": {"parts": [{"text": "{}"}]}, "finishReason": "STOP"}],
+                "usageMetadata": {},
+            },
+        )
+
+    r = GeminiClient(_settings(), transport=httpx.MockTransport(flaky)).complete(_prompts(), "t", "system.md", {}, "")
+    assert r.data == {} and calls["n"] == 3  # two 503s absorbed, third attempt succeeded
+
+    always_down = httpx.MockTransport(lambda req: httpx.Response(503, json={"error": {"message": "overloaded"}}))
+    with pytest.raises(ProviderUnavailableError, match="503"):
+        GeminiClient(_settings(), transport=always_down).complete(_prompts(), "t", "system.md", {}, "")
+    bad_request = httpx.MockTransport(lambda req: httpx.Response(400, json={"error": {"message": "bad schema"}}))
+    with pytest.raises(httpx.HTTPStatusError):  # 4xx is our fault; not retried, not masked
+        GeminiClient(_settings(), transport=bad_request).complete(_prompts(), "t", "system.md", {}, "")
+
+
+def test_gemini_falls_back_to_next_model_and_records_it(monkeypatch):
+    import time
+
+    monkeypatch.setenv("GEMINI_API_KEY", "k")
+    monkeypatch.setattr(time, "sleep", lambda s: None)
+    hit: list[str] = []
+
+    def handler(req: httpx.Request) -> httpx.Response:
+        model = req.url.path.rsplit("/", 1)[-1].split(":")[0]
+        hit.append(model)
+        if model == "gemini-3.8-flash":
+            return httpx.Response(503, json={"error": {"message": "high demand"}})
+        return httpx.Response(
+            200,
+            json={
+                "candidates": [{"content": {"parts": [{"text": "{}"}]}, "finishReason": "STOP"}],
+                "usageMetadata": {},
+                "modelVersion": model,
+            },
+        )
+
+    s = Settings(env="dev", provider="gemini", gemini_fallback_models=["gemini-3.5-flash"], _env_file=None)
+    r = GeminiClient(s, transport=httpx.MockTransport(handler)).complete(_prompts(), "t", "system.md", {}, "")
+    assert hit.count("gemini-3.8-flash") == 4 and hit[-1] == "gemini-3.5-flash"
+    assert r.model_requested == "gemini-3.8-flash" and r.model_served == "gemini-3.5-flash" and r.fallback_used
+
+
 def test_gemini_safety_block_becomes_refusal(monkeypatch):
     monkeypatch.setenv("GEMINI_API_KEY", "k")
     blocked = httpx.MockTransport(lambda req: httpx.Response(200, json={"promptFeedback": {"blockReason": "SAFETY"}}))
