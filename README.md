@@ -371,4 +371,4 @@ This repository is an engineering and learning project. The presence of document
 
 ## License
 
-See the repository's license information for applicable usage and distribution terms.
+Released under the [MIT License](LICENSE). You may use, modify, and distribute this software, including commercially, provided the copyright and licence notice are retained.

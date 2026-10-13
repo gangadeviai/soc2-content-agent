@@ -10,6 +10,7 @@ name = "soc2-content-agent"
 version = "1.0.0"
 description = "SOC 2-ready Marketing Content Writer Agent (PII proxy, tenant-isolated RAG, versioned prompts, human review gate, WORM audit trail)"
 requires-python = ">=3.11"
+license = { file = "LICENSE" }
 dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.30",
