@@ -1,0 +1,19 @@
+# Secret-scan configuration (CI control C-20). Extends gitleaks' default rules.
+# The allowlist covers ONLY the deliberately fake credentials used as test fixtures to
+# prove the redaction and secret-guard controls work. Real secrets live in .env (git-ignored).
+title = "soc2-content-agent"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Fake credentials used as redaction / secret-guard test fixtures"
+paths = [
+  '''tests/.*''',
+  '''scripts/demo_walkthrough\.py''',
+  '''app/static/demo\.html''',
+]
+regexes = [
+  '''sk-ant-api03-abcdefghijklmnopqrstuvwxyz0123456789''',
+  '''AKIAABCDEFGHIJKLMNOP''',
+]
