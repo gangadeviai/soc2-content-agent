@@ -13,9 +13,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+import jwt
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError, jwt
+from jwt import PyJWTError as JWTError
 
 from .config import Settings, get_settings
 
