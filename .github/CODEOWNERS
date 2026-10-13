@@ -1,9 +1,11 @@
-# Prompt and model changes are behaviour changes (CC8.1). They require review by security.
-/prompts/                       @marketing-platform-security @marketing-platform-leads
-/tenants/                       @marketing-platform-security
-/app/llm.py                     @marketing-platform-security
-/app/brand.py                   @marketing-platform-security
-/app/cms.py                     @marketing-platform-security
-/app/config.py                  @marketing-platform-security
-/compliance/                    @marketing-platform-security @grc-team
-/infra/                         @platform-infra @marketing-platform-security
+# Prompt, model, tenant-config and publisher changes are behaviour changes (CC8.1).
+# In a team these would be separate security / GRC / infra groups; in this learning
+# repo the single owner reviews them. Replace with team handles when the team grows.
+/prompts/                       @gangadeviai
+/tenants/                       @gangadeviai
+/app/llm.py                     @gangadeviai
+/app/config.py                  @gangadeviai
+/app/brand.py                   @gangadeviai
+/app/cms.py                     @gangadeviai
+/compliance/                    @gangadeviai
+/infra/                         @gangadeviai
